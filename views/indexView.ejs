@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Drive</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('sidebar', { headerTitle: headerTitle, folders: folders || []}) %>
+    <main class="content">
+        <div class="content-header">
+            <%- include('header', { }) %>
+        </div>
+        
+        <div class="files-container">
+            <!-- File content will go here -->
+            <% if (files && files.length > 0) { %>
+                <% if (locals.chosenFolder) { %>
+                    
+                <% } %>
+                <div class="files-grid">
+                    <%if (locals.nestedFolders){ %>
+                        <% nestedFolders.forEach((folder) => { %>
+                            <div class="folder-item" onclick="window.location.href='/folder/<%= folder.id %>'">
+                                <div class="file-icon">📂</div>
+                                <div class="file-name"><%= folder.name %></div>
+                            </div>
+                        <% })%>
+                    <% }%>
+                    <% files.forEach((file) => { %>
+                        <div class="file-item" 
+                        data-filename="<%= file.name %>"
+                        data-id="<%= file.id %>"
+                        data-size="<%= file.size %>"
+                        data-ext="<%= file.extension %>"
+                        data-added="<%= file.createdAt %>"
+                        >
+                            <div class="file-icon">📄</div>
+                            <div class="file-name"><%= file.name %></div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <p>No files yet. Start by uploading a file!</p>
+                </div>
+            <% } %>
+        </div>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">File name</h2>
+                <a class="close" href="#">×</a>
+            </div>
+            <div class="modal-body">
+                <div class="file-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Size:</span>
+                        <span id="modal-size" class="detail-value">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Type:</span>
+                        <span id="modal-ext" class="detail-value">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Added:</span>
+                        <span id="modal-added" class="detail-value">--</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a id="download-link" class="modal-button primary" href="#">Download</a>
+                <a id="delete-link" class="modal-button danger" href="#">Delete</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        const modal = document.getElementById("modal");
+        const modalTitle = document.getElementById("modal-title");
+        const modalSize = document.getElementById("modal-size");
+        const modalExt = document.getElementById("modal-ext");
+        const modalAdded = document.getElementById("modal-added");
+        const downloadLink = document.getElementById("download-link");
+        const deleteLink = document.getElementById("delete-link");
+        const fileItems = document.querySelectorAll(".file-item");
+        const closeBtn = document.querySelector(".close");
+
+        fileItems.forEach((item) => {
+            item.onclick = () => {
+                // Get file metadata from data attributes
+                const fileName = item.getAttribute("data-filename");
+                const fileSize = item.getAttribute("data-size");
+                const fileExt = item.getAttribute("data-ext");
+                const fileAdded = item.getAttribute("data-added");
+                const fileId = item.getAttribute("data-id");
+
+                
+                const trimmedAdded = new Date(fileAdded).toLocaleDateString();
+                // Update modal content
+                modalTitle.textContent = fileName;
+                modalSize.textContent = fileSize || "--";
+                modalExt.textContent = fileExt || "--";
+                modalAdded.textContent = trimmedAdded || "--";
+
+                downloadLink.setAttribute("download", `/uploads/${fileName}`);
+                deleteLink.setAttribute("href", `/delete/?id=${fileId}`);
+
+                // Show the modal
+                modal.style.display = "block";
+            };
+        });
+
+
+        closeBtn.onclick = (e) => {
+            e.preventDefault();
+            modal.style.display = "none";
+        };
+
+        // Close modal when clicking outside the content
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+
+    </script>
+</body>
+</html>

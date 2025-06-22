@@ -1,0 +1,27 @@
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <a href="/" class="logo-link">
+            <img src="/images/logo.png" alt="My Drive Logo">
+            <h1>MyDrive</h1>
+        </a>
+    </div>
+    <div class="folders-section">
+        <div class="folders-header">
+            <h2>Folders</h2>
+            <a href="/folder/create" class="create-folder-btn">+</a>
+        </div>
+        
+        <ul class="folders-list">
+            <% if (folders && folders.length > 0) { %>
+                <% folders.filter((folder) => !folder.parentId).forEach(function(folder) { %>
+                    <li class="sidebar-folder-item">
+                        <i class="sidebar-folder-icon">📁</i>
+                        <a href="/folder/<%= folder.id %>" class="folder-link"><%= folder.name %></a>
+                    </li>
+                <% }) %> 
+            <% } else { %>
+                <li class="no-folders">No folders yet</li>
+            <% } %>
+        </ul>
+    </div>
+</aside>

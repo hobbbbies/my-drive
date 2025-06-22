@@ -10,6 +10,9 @@ async function uploadPost(req, res) {
         const baseName = path.basename(file.originalname, ext);
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const uniqueFileName = `${baseName}-${uniqueSuffix}${ext}`;
+
+        const { data: { user } } = await supabase.auth.getUser();
+        const userId = user ? user.id : null;
         
         let folder = "";
         if (req.body.folder) {
@@ -38,7 +41,8 @@ async function uploadPost(req, res) {
                 size: file.size,
                 extension: ext,
                 storagePath: `${folderName}/${uniqueFileName}`,
-                folderId: folder.id || null
+                folderId: folder.id || null,
+                userid: userId,
              })
         if (error) return res.status(400).send("erorr with supabase insert");
         res.redirect("/");
