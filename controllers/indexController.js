@@ -1,8 +1,14 @@
-const {createClient} = require('@supabase/supabase-js');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY); 
 
 async function indexGet(req, res) {
+    const accessToken = req.session?.supabase?.access_token;
+    let supabase;
+    if (accessToken) {
+        supabase = createClient(accessToken);
+    } else {
+        return res.render("loginView", { error: "Invalid access token" });
+    }
     const folders = await supabase.from('Folder').select();
     let files = await supabase.from('File').select();
     const rootFolders = folders.data.filter((folder) => folder.parentId === null);

@@ -11,7 +11,7 @@ const adminClient = createClient(
 function createUserClient(token) {
     return createClient(
         process.env.SUPABASE_URL, 
-        process.env.SUPABASE_ANON_KEY, // Use anon key for user operations
+        process.env.SUPABASE_API_KEY, 
         {
             auth: {
                 persistSession: false,
