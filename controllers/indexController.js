@@ -6,7 +6,7 @@ async function indexGet(req, res) {
     const folders = await supabase.from('Folder').select();
     let files = await supabase.from('File').select();
     const rootFolders = folders.data.filter((folder) => folder.parentId === null);
-    res.render('indexView', { headerTitle: "MyDrive", folders: folders, files: files.data, nestedFolders: rootFolders });
+    res.render('indexView', { headerTitle: "MyDrive", folders: folders, files: files.data, nestedFolders: rootFolders, user: req.user });
 }
 
 async function fileDelete(req, res) {

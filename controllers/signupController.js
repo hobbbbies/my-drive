@@ -7,7 +7,7 @@ async function signup(req, res) {
         const { name, email, password } = req.body;
         
         // Pass user metadata including name as options.data
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
             options: {
@@ -23,16 +23,27 @@ async function signup(req, res) {
             return res.render('signupView', { error: error.message });
         }
 
-        const { errorLogin } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
+        // const { error: insertError } = await supabase
+        // .insert
+        // .from('User')
+        // .insert({ id: data.session.user.id, name: name, email: email});
 
-        if (errorLogin) {
-            console.error("Login error:", error);
-            return res.render('signupView', { error: error.message });
+        // const { errorLogin } = await supabase.auth.signInWithPassword({
+        //     email: email,
+        //     password: password,
+        // });
+
+        // if (errorLogin) {
+        //     console.error("Login error:", errorLogin);
+        //     return res.render('signupView', { error: errorLogin.message });
+        // }
+
+        req.session.supabase = {
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            name: name,
         }
-        
+                
         // On successful signup
         res.redirect("/");
     } catch (error) {

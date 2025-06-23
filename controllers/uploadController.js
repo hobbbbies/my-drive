@@ -1,7 +1,7 @@
 const {createClient} = require('@supabase/supabase-js');
 require('dotenv').config();
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY); 
 const path = require('path');
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY); 
 
 async function uploadPost(req, res) {
     try {
@@ -11,7 +11,7 @@ async function uploadPost(req, res) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const uniqueFileName = `${baseName}-${uniqueSuffix}${ext}`;
 
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser(req.session.supabase.access_token);
         const userId = user ? user.id : null;
         
         let folder = "";

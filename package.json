@@ -23,6 +23,10 @@
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-session": "^1.18.1",
     "multer": "^2.0.1"
+  },
+  "devDependencies": {
+    "connect-pg-simple": "^10.0.0"
   }
 }

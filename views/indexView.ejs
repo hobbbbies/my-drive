@@ -10,7 +10,7 @@
     <%- include('sidebar', { headerTitle: headerTitle, folders: folders || []}) %>
     <main class="content">
         <div class="content-header">
-            <%- include('header', { }) %>
+            <%- include('header', { user: user}) %>
         </div>
         
         <div class="files-container">

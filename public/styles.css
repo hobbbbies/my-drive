@@ -241,6 +241,10 @@ body {
 }
 
 .header {
+    width: 100%;
+}
+
+.bottom-header {
     display: flex;
     justify-content: space-between;
     width: 100%;
