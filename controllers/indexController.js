@@ -1,11 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
+const { createUserClient } = require('../controllers/createClient');
 require('dotenv').config();
 
 async function indexGet(req, res) {
     const accessToken = req.session?.supabase?.access_token;
     let supabase;
     if (accessToken) {
-        supabase = createClient(accessToken);
+        supabase = createUserClient(accessToken);
     } else {
         return res.render("loginView", { error: "Invalid access token" });
     }

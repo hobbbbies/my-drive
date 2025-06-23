@@ -3,14 +3,16 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const path = require('path');
+
 const indexRouter = require("./routes/indexRouter");
 const uploadRouter = require("./routes/uploadRouter");
 const authRouter = require("./routes/authRouter");
+const folderRouter = require("./routes/folderRouter");
+
 const { log } = require("console");
 const {createClient} = require('@supabase/supabase-js');
 require('dotenv').config();
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY); 
-// const folderRouter = require("./routes/folderRouter");
 const session = require("express-session");
 const pgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg')
@@ -42,7 +44,7 @@ app.use(session({
 app.use("/", indexRouter);
 app.use("/upload", uploadRouter);
 app.use("/auth", authRouter);
-// app.use("/folder", folderRouter);
+app.use("/folder", folderRouter);
 
 app.listen(PORT, () => {
     console.log("Listening on 3000");

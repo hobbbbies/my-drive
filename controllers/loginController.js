@@ -17,9 +17,21 @@ async function loginPost (req, res) {
             return res.render('loginView', { error: error.message });
         }
 
+        const { data: nameData, error: nameError} = await supabase
+                                            .from('User')
+                                            .select('name')
+                                            .eq('id', data.user.id)
+                                            .maybeSingle();
+
+        if (nameError) {
+            console.error("error fetching user:", nameError);
+            return res.render('loginView', { error: nameError.message });
+        }
+
         req.session.supabase = {
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
+            name: nameData.name
         }
         
         // On successful login

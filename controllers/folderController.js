@@ -1,4 +1,5 @@
 const {createClient} = require('@supabase/supabase-js');
+const { createUserClient } = require('../controllers/createClient');
 require('dotenv').config();
 const path = require("path");
 
@@ -6,14 +7,13 @@ async function folderPost (req, res) {
     const accessToken = req.session?.supabase?.access_token;
     let supabase;
     if (accessToken) {
-        supabase = createClient(accessToken);
+        supabase = createUserClient(accessToken);
     } else {
         return res.render("loginView", { error: "Invalid access token" });
     }
 
     try {
-        const { folderName } = req.body;
-        const parentId = JSON.parse(req.body.folder).id || null;
+        const { folderName, folder: parentId } = req.body;
         const userid = req.user.id;
         const { error: folderError} = await supabase
                             .from('Folder')
@@ -42,8 +42,22 @@ async function folderPost (req, res) {
 }
 
 async function folderCreateGet(req, res) {
+    const accessToken = req.session?.supabase?.access_token;
+    let supabase;
+    if (accessToken) {
+        supabase = createUserClient(accessToken);
+    } else {
+        return res.render("loginView", { error: "Invalid access token" });
+    }
+
     try {
-        const folders = await prisma.folder.findMany();
+        const { data: folders, error} = await supabase
+                            .from('Folder')
+                            .select();
+        if (error) {
+            console.log("Error getting folders: ", error);
+            res.status(500).json({ error: error.message });
+        }
         res.render('folderCreateView', { folders: folders });
     } catch(err) {
         res.status(500).json({ error: err.message });

@@ -23,20 +23,21 @@ async function signup(req, res) {
             return res.render('signupView', { error: error.message });
         }
 
-        // const { error: insertError } = await supabase
-        // .insert
-        // .from('User')
-        // .insert({ id: data.session.user.id, name: name, email: email});
+        const { error: insertError } = await supabase
+        .from('User')
+        .insert({ id: data.session.user.id, name: name, email: email});
 
+
+        if (insertError) {
+            console.error("Insert error:", insertError);
+            return res.render('signupView', { error: insertError.message });
+        }
         // const { errorLogin } = await supabase.auth.signInWithPassword({
         //     email: email,
         //     password: password,
         // });
 
-        // if (errorLogin) {
-        //     console.error("Login error:", errorLogin);
-        //     return res.render('signupView', { error: errorLogin.message });
-        // }
+
 
         req.session.supabase = {
             access_token: data.session.access_token,
