@@ -37,12 +37,12 @@ async function uploadPost(req, res) {
                 size: file.size,
                 extension: ext,
                 storagePath: `${folderName}/${uniqueFileName}`,
-                folderId: folder.id || null,
+                folderid: folder.id || null,
                 userid: req.user.id,
              })
         if (error) {
             console.error("error with inserting user: ", error);
-            res.status(400).send("error with supabase insert");
+            return res.status(400).send("error with supabase insert");
         } 
         res.redirect("/");
     } catch(error) {

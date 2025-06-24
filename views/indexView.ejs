@@ -35,6 +35,8 @@
                             data-size="<%= file.size %>"
                             data-ext="<%= file.extension %>"
                             data-added="<%= file.createdAt %>"
+                            data-folderid="<%= file.folderid %>"
+                            data-storagePath="<%= file.storagePath %>"
                             >
                                 <div class="file-icon">📄</div>
                                 <div class="file-name"><%= file.name %></div>
@@ -96,8 +98,9 @@
                 const fileSize = item.getAttribute("data-size");
                 const fileExt = item.getAttribute("data-ext");
                 const fileAdded = item.getAttribute("data-added");
-                const fileId = item.getAttribute("data-id");
-
+                const fileid = item.getAttribute("data-id");
+                const folderid = item.getAttribute("data-folderid");
+                const storagePath = item.getAttribute("data-storagePath");
                 
                 const trimmedAdded = new Date(fileAdded).toLocaleDateString();
                 // Update modal content
@@ -106,8 +109,8 @@
                 modalExt.textContent = fileExt || "--";
                 modalAdded.textContent = trimmedAdded || "--";
 
-                downloadLink.setAttribute("download", `/uploads/${fileName}`);
-                deleteLink.setAttribute("href", `/delete/?id=${fileId}`);
+                downloadLink.setAttribute("href", `/download/?path=${storagePath}&fileName=${fileName}&ext=${fileExt}`);
+                deleteLink.setAttribute("href", `/delete/?id=${fileid}`);
 
                 // Show the modal
                 modal.style.display = "block";

@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { createUserClient } = require('../controllers/createClient');
+const fs = require('fs');
 require('dotenv').config();
 
 async function indexGet(req, res) {
@@ -53,4 +54,28 @@ async function fileDelete(req, res) {
     }
 }
 
-module.exports = { indexGet, fileDelete };
+async function fileDownload(req, res) {
+    try{
+        const { data, error } = await req.supabaseClient
+                                    .storage
+                                    .from('uploads')
+                                    .download(req.query.path);
+        if (error) {
+            console.error("Error deleting file: ", response.error.message);
+            res.status(500).send("Error deleting file on the DB side.");
+        } 
+
+        const buffer = Buffer.from(await data.arrayBuffer());
+        res.setHeader('Content-Disposition', `attachment; filename="${req.query.fileName}${req.query.ext}"`);
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.send(buffer);
+
+        // const referrer = req.get('Referer') || '/';
+        // res.redirect(referrer);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send("Error downloading file");
+    }
+}
+
+module.exports = { indexGet, fileDelete, fileDownload };
