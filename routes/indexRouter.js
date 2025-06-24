@@ -8,6 +8,6 @@ router.get("/", userAuth, attachClient, controller.indexGet);
 
 router.get("/root/:folderid", userAuth, attachClient, controller.indexGet);
 
-router.get("/delete", controller.fileDelete);
+router.get("/delete", userAuth, attachClient, controller.fileDelete);
 
 module.exports = router;

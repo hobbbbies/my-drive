@@ -3,14 +3,6 @@ const { createUserClient } = require('../controllers/createClient');
 require('dotenv').config();
 
 async function indexGet(req, res) {
-    // const accessToken = req.session?.supabase?.access_token;
-    // let supabase;
-    // if (accessToken) {
-    //     supabase = createUserClient(accessToken);
-    // } else {
-    //     return res.render("loginView", { error: "Invalid access token" });
-    // }
-
     const { data: folders, error: folderError } = await req.supabaseClient.from('Folder').select();
     const folderid = req.params.folderid;
     if (folderid) {
@@ -48,12 +40,14 @@ async function indexGet(req, res) {
 
 async function fileDelete(req, res) {
     try{
-        await prisma.file.delete({
-            where: {id: req.query.id}
-        });
+        const response = await req.supabaseClient.from('File').delete().eq('id', req.query.id);
+        if (response.error) {
+            console.error("Error deleting file: ", response.error.message);
+            res.status(500).send("Error deleting file on the DB side.");
+        }
         const referrer = req.get('Referer') || '/';
         res.redirect(referrer);
-    } catch(err) {
+    } catch(error) {
         console.error(error);
         res.status(500).send("Error deleting file");
     }
