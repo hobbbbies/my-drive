@@ -1,7 +1,6 @@
 const {createClient} = require('@supabase/supabase-js');
 require('dotenv').config();
 const path = require('path');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY); 
 
 async function uploadPost(req, res) {
     try {
@@ -10,9 +9,6 @@ async function uploadPost(req, res) {
         const baseName = path.basename(file.originalname, ext);
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const uniqueFileName = `${baseName}-${uniqueSuffix}${ext}`;
-
-        const { data: { user } } = await supabase.auth.getUser(req.session.supabase.access_token);
-        const userId = user ? user.id : null;
         
         let folder = "";
         if (req.body.folder) {
@@ -24,7 +20,7 @@ async function uploadPost(req, res) {
         }
         const folderName = folder ? folder.name : ""
 
-        const { data, error: uploadError } = await supabase
+        const { data, error: uploadError } = await req.supabaseClient
             .storage
             .from('uploads') // Replace with your actual bucket name
             .upload(`${folderName}/${uniqueFileName}`, file.buffer);
@@ -34,7 +30,7 @@ async function uploadPost(req, res) {
             return res.status(400).send("Error uploading file to storage");
         }
 
-        const { error } = await supabase
+        const { error } = await req.supabaseClient
             .from('File')
             .insert({ 
                 name: baseName,
@@ -42,9 +38,12 @@ async function uploadPost(req, res) {
                 extension: ext,
                 storagePath: `${folderName}/${uniqueFileName}`,
                 folderId: folder.id || null,
-                userid: userId,
+                userid: req.user.id,
              })
-        if (error) return res.status(400).send("erorr with supabase insert");
+        if (error) {
+            console.error("error with inserting user: ", error);
+            res.status(400).send("error with supabase insert");
+        } 
         res.redirect("/");
     } catch(error) {
         console.error(error);
@@ -54,7 +53,7 @@ async function uploadPost(req, res) {
 
 async function uploadGet(req, res) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await req.supabaseClient
             .from('Folder')
             .select()
 

@@ -15,37 +15,38 @@
         
         <div class="files-container">
             <!-- File content will go here -->
-            <% if (files && files.length > 0) { %>
                 <% if (locals.chosenFolder) { %>
                     
                 <% } %>
                 <div class="files-grid">
                     <%if (locals.nestedFolders){ %>
                         <% nestedFolders.forEach((folder) => { %>
-                            <div class="folder-item" onclick="window.location.href='/folder/<%= folder.id %>'">
+                            <div class="folder-item" onclick="window.location.href='/root/<%= folder.id %>'">
                                 <div class="file-icon">📂</div>
                                 <div class="file-name"><%= folder.name %></div>
                             </div>
                         <% })%>
                     <% }%>
-                    <% files.forEach((file) => { %>
-                        <div class="file-item" 
-                        data-filename="<%= file.name %>"
-                        data-id="<%= file.id %>"
-                        data-size="<%= file.size %>"
-                        data-ext="<%= file.extension %>"
-                        data-added="<%= file.createdAt %>"
-                        >
-                            <div class="file-icon">📄</div>
-                            <div class="file-name"><%= file.name %></div>
-                        </div>
-                    <% }); %>
+                    <% if (locals.files) { %>
+                        <% files.forEach((file) => { %>
+                            <div class="file-item" 
+                            data-filename="<%= file.name %>"
+                            data-id="<%= file.id %>"
+                            data-size="<%= file.size %>"
+                            data-ext="<%= file.extension %>"
+                            data-added="<%= file.createdAt %>"
+                            >
+                                <div class="file-icon">📄</div>
+                                <div class="file-name"><%= file.name %></div>
+                            </div>
+                        <% }); %>
+                    <% } %>
                 </div>
-            <% } else { %>
-                <div class="empty-state">
-                    <p>No files yet. Start by uploading a file!</p>
-                </div>
-            <% } %>
+                <% if ((!files || !files.length) && (!nestedFolders || !nestedFolders.length)) { %>
+                    <div class="empty-state">
+                        <p>No files yet. Start by uploading a file!</p>
+                    </div>
+                <% } %>
         </div>
     </main>
 

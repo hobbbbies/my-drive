@@ -16,7 +16,7 @@
                 <% folders.filter((folder) => !folder.parentId).forEach(function(folder) { %>
                     <li class="sidebar-folder-item">
                         <i class="sidebar-folder-icon">📁</i>
-                        <a href="/folder/<%= folder.id %>" class="folder-link"><%= folder.name %></a>
+                        <a href="/root/<%= folder.id %>" class="folder-link"><%= folder.name %></a>
                     </li>
                 <% }) %> 
             <% } else { %>

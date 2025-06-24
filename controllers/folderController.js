@@ -4,18 +4,10 @@ require('dotenv').config();
 const path = require("path");
 
 async function folderPost (req, res) {
-    const accessToken = req.session?.supabase?.access_token;
-    let supabase;
-    if (accessToken) {
-        supabase = createUserClient(accessToken);
-    } else {
-        return res.render("loginView", { error: "Invalid access token" });
-    }
-
     try {
         const { folderName, folder: parentId } = req.body;
         const userid = req.user.id;
-        const { error: folderError} = await supabase
+        const { error: folderError} = await req.supabaseClient
                             .from('Folder')
                             .insert({ name: folderName, parentid: parentId, userid: userid });
            
@@ -24,7 +16,7 @@ async function folderPost (req, res) {
             return res.status(500).send("Error creating folder");
         }
 
-        const { error: storageError} = await supabase
+        const { error: storageError} = await req.supabaseClient
             .storage
             .from('uploads') 
             .upload(folderName);
@@ -42,16 +34,8 @@ async function folderPost (req, res) {
 }
 
 async function folderCreateGet(req, res) {
-    const accessToken = req.session?.supabase?.access_token;
-    let supabase;
-    if (accessToken) {
-        supabase = createUserClient(accessToken);
-    } else {
-        return res.render("loginView", { error: "Invalid access token" });
-    }
-
     try {
-        const { data: folders, error} = await supabase
+        const { data: folders, error} = await req.supabaseClient
                             .from('Folder')
                             .select();
         if (error) {
@@ -64,21 +48,4 @@ async function folderCreateGet(req, res) {
     }
 }
 
-async function folderGet(req, res) {
-    const folders = await prisma.folder.findMany({});
-    let files = await prisma.file.findMany({});
-    const folderId = req.params.folderId;
-    const chosenFolder = await prisma.folder.findUnique({
-        where: { id: folderId}
-    })
-
-    files = files.filter((file) => {
-        return file.folderId === folderId
-    });
-
-    const nestedFolders = folders.filter((folder) => folder.parentId === chosenFolder.id);
-
-    res.render('indexViews', { headerTitle: chosenFolder.name, folders: folders, files: files, nestedFolders: nestedFolders });
-}
-
-module.exports = { folderGet, folderPost, folderCreateGet }
+module.exports = { folderPost, folderCreateGet }

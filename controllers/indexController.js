@@ -3,17 +3,47 @@ const { createUserClient } = require('../controllers/createClient');
 require('dotenv').config();
 
 async function indexGet(req, res) {
-    const accessToken = req.session?.supabase?.access_token;
-    let supabase;
-    if (accessToken) {
-        supabase = createUserClient(accessToken);
+    // const accessToken = req.session?.supabase?.access_token;
+    // let supabase;
+    // if (accessToken) {
+    //     supabase = createUserClient(accessToken);
+    // } else {
+    //     return res.render("loginView", { error: "Invalid access token" });
+    // }
+
+    const { data: folders, error: folderError } = await req.supabaseClient.from('Folder').select();
+    const folderid = req.params.folderid;
+    if (folderid) {
+        var { data: files, error: fileError } = await req.supabaseClient
+                                                    .from('File')
+                                                    .select()
+                                                    .eq('folderid', folderid);
     } else {
-        return res.render("loginView", { error: "Invalid access token" });
+        var { data: files, error: fileError } = await req.supabaseClient
+                                                    .from('File')
+                                                    .select()
+                                                    .is('folderid', null);
     }
-    const folders = await supabase.from('Folder').select();
-    let files = await supabase.from('File').select();
-    const rootFolders = folders.data.filter((folder) => folder.parentId === null);
-    res.render('indexView', { headerTitle: "MyDrive", folders: folders, files: files.data, nestedFolders: rootFolders, user: req.user });
+    
+    if (folderError || fileError) {
+        console.error("folderGet error: ", folderError);
+        console.error("fileGet error: ", fileError);
+        return res.status(500).send("Server error");
+    }
+
+    let nestedFolders;
+    if (folderid) {
+        const { data: chosenFolder} = await req.supabaseClient
+                            .from("Folder")
+                            .select()
+                            .eq('id', folderid)
+                            .single();
+        nestedFolders = folders.filter((folder) => folder.parentid === folderid);
+    } else {
+        nestedFolders = folders.filter((folder) => folder.parentid === null);
+    }
+   
+    res.render('indexView', { headerTitle: "MyDrive", folders: folders, files: files, nestedFolders: nestedFolders, user: req.user });
 }
 
 async function fileDelete(req, res) {
@@ -28,39 +58,5 @@ async function fileDelete(req, res) {
         res.status(500).send("Error deleting file");
     }
 }
-
-// WIP function
-// async function downloadFile(req, res) {
-//   try {
-//     const fileId = req.params.id;
-    
-//     // Get file from database
-//     const file = await prisma.file.findUnique({
-//       where: { id: fileId }
-//     });
-    
-//     if (!file) {
-//       return res.status(404).send('File not found');
-//     }
-    
-//     // Construct file path
-//     const filePath = path.join(__dirname, '..', 'uploads', file.storagePath || file.name);
-    
-//     // Check if file exists
-//     if (!fs.existsSync(filePath)) {
-//       return res.status(404).send('File not found on disk');
-//     }
-    
-//     // Set headers for file download
-//     res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`);
-    
-//     // Stream file to response
-//     const fileStream = fs.createReadStream(filePath);
-//     fileStream.pipe(res);
-//   } catch (error) {
-//     console.error('Download error:', error);
-//     res.status(500).send('Error downloading file');
-//   }
-// }
 
 module.exports = { indexGet, fileDelete };

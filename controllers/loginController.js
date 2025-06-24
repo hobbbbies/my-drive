@@ -42,7 +42,7 @@ async function loginPost (req, res) {
     } 
 }
 
-async function logout (req, res) {
+async function logout (req, res, next) {
     const { error } = await supabase.auth.signOut();
     if (error) {
         console.error("Server error:", error);
@@ -52,7 +52,7 @@ async function logout (req, res) {
         access_token: null,
         refresh_token: null,
     }
-    res.redirect("/auth/login");
+    next()
 }
 
 module.exports = { loginPost, logout };
