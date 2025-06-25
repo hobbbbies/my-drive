@@ -550,3 +550,116 @@ body {
     opacity: 1;
 }
 
+/* Add these styles to the bottom of your existing CSS file */
+
+/* Form Container Styling */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px;
+    background-color: var(--color-background);
+    border-radius: 8px;
+    box-shadow: 0 1px 4px var(--color-shadow);
+}
+
+/* Form Select Styling */
+.form-select {
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    background-color: var(--color-background);
+    transition: border-color 0.2s;
+}
+
+.form-select:focus {
+    border-color: var(--color-primary);
+    outline: none;
+}
+
+/* File Input Styling */
+.file-input-container {
+    margin-top: 8px;
+}
+
+.file-input-container input[type="file"] {
+    padding: 10px 0;
+    width: 100%;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+}
+
+.btn-secondary {
+    padding: 12px 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-background);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-hover);
+}
+
+/* Folder select header with create link */
+.folder-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.create-folder-link {
+    font-size: 14px;
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.create-folder-link:hover {
+    text-decoration: underline;
+}
+
+/* Fix for content layout */
+.content {
+    padding: 20px;
+}
+
+/* Make sure form fields are all same width */
+.form-group {
+    width: 100%;
+}
+
+/* Make sure auth-button fills width when alone */
+.auth-button {
+    flex: 1;
+    max-width: 200px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 16px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .auth-button, .btn-secondary {
+        max-width: none;
+        width: 100%;
+    }
+}
+

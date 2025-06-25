@@ -3,22 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Create Folder - MyDrive</title>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <h1>Folder name: </h1>
-    <form action="/folder/create" method="post">
-            <label for="folderName">Folder Name:</label>
-            <input type="text" name="folderName" id="folderName"/>
-
-            <select name="folder" id="folder">
-                <option value="">Root Directory</option>
-                <% folders.forEach(folder => { %>
-                    <option name="parentId" value="<%= folder.id %>"><%= folder.name %></option>
-                <% }); %>
-            </select>
-        <button>Submit</button>
-    </form>
+    <%- include('sidebar', { headerTitle: "Create Folder", folders: folders || []}) %>
+    <main class="content">
+        <div class="content-header">
+            <%- include('header', { headerTitle: "Create Folder", user: user || {} }) %>
+        </div>
+        
+        <div class="form-container">
+            <form action="/folder/create" method="post" class="auth-form">
+                <div class="form-group">
+                    <label for="folderName">Folder Name:</label>
+                    <input type="text" name="folderName" id="folderName" placeholder="Enter folder name" required />
+                </div>
+                
+                <div class="form-group">
+                    <label for="folder">Parent Folder:</label>
+                    <select name="folder" id="folder" class="form-select">
+                        <option value="">Root Directory</option>
+                        <% folders.forEach(folder => { %>
+                            <option name="parentId" value="<%= folder.id %>"><%= folder.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="auth-button">Create Folder</button>
+                    <a href="/" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
 </body>
 </html>

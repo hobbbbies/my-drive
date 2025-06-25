@@ -59,7 +59,7 @@ async function uploadGet(req, res) {
             .from('Folder')
             .select()
 
-        res.render('uploadView', { folders: data });
+        res.render('uploadView', { folders: data, user: req.user });
     } catch (error) {
         console.error("Error fetching folders:", error);
         res.render('uploadView', { folders: [] });

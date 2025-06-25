@@ -27,13 +27,14 @@ async function indexGet(req, res) {
     let nestedFolders;
     const rootFolders = folders.filter((folder) => folder.parentid === null);;
     if (folderid) {
-        const { data: chosenFolder} = await req.supabaseClient
+        var { data: chosenFolder} = await req.supabaseClient
                             .from("Folder")
                             .select()
                             .eq('id', folderid)
                             .single();
         nestedFolders = folders.filter((folder) => folder.parentid === folderid);
     } else {
+        var chosenFolder = null;
         nestedFolders = rootFolders;
     }
    

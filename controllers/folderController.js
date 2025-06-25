@@ -49,7 +49,7 @@ async function folderCreateGet(req, res) {
             console.log("Error getting folders: ", error);
             res.status(500).json({ error: error.message });
         }
-        res.render('folderCreateView', { folders: folders });
+        res.render('folderCreateView', { folders: folders, user: req.user });
     } catch(err) {
         res.status(500).json({ error: err.message });
     }

@@ -4,25 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload - MyDrive</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <h1>Upload a file: </h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <div>
-            <label for="folder">Select folder:</label>
-            <a href="/folder/create">Create new folder</a>
-            <select name="folder" id="folder">
-                <option value="">-- Select a folder --</option>
-                <% folders.forEach(folder => { %>
-                    <option value="<%= JSON.stringify(folder) %>"><%= folder.name %></option>
-                <% }); %>
-            </select>
+    <%- include('sidebar', { headerTitle: "Upload", folders: folders || []}) %>
+    <main class="content">
+        <div class="content-header">
+            <%- include('header', { headerTitle: "Upload File", user: user || {} }) %>
         </div>
-        <div>
-            <input type="file" name="file" />
+        
+        <div class="form-container">
+            <form action="/upload" method="post" enctype="multipart/form-data" class="auth-form">
+                <div class="form-group">
+                    <label for="file">Select file to upload:</label>
+                    <div class="file-input-container">
+                        <input type="file" name="file" id="file" required />
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="folder-select-header">
+                        <label for="folder">Select destination folder:</label>
+                        <a href="/folder/create" class="create-folder-link">Create new folder</a>
+                    </div>
+                    <select name="folder" id="folder" class="form-select">
+                        <option value="">Root Directory</option>
+                        <% folders.forEach(folder => { %>
+                            <option value="<%= JSON.stringify(folder) %>"><%= folder.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="auth-button">Upload File</button>
+                    <a href="/" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
         </div>
-        <button>Submit</button>
-    </form>
+    </main>
 </body>
 </html>
