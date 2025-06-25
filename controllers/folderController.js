@@ -8,7 +8,7 @@ async function folderPost (req, res) {
         if (parentid !== "") {
             const { error: folderError} = await req.supabaseClient
                                                     .from('Folder')
-                                                     .insert({ name: folderName, parentid: parentId, userid: userid });   
+                                                     .insert({ name: folderName, parentid: parentid, userid: userid });   
             if (folderError) {
                 console.error("Error creating folder in database:", folderError);
                 return res.status(500).send("Error creating folder");
@@ -23,15 +23,15 @@ async function folderPost (req, res) {
             }
         }
 
-        const { error: storageError} = await req.supabaseClient
-            .storage
-            .from('uploads') 
-            .upload(folderName);
+        // const { error: storageError} = await req.supabaseClient
+        //     .storage
+        //     .from('uploads') 
+        //     .upload(folderName);
 
-        if (storageError) {
-            console.error("Error creating folder in storage:", storageError);
-            res.status(500).send("Error uploading folder into storage");
-        }
+        // if (storageError) {
+        //     console.error("Error creating folder in storage:", storageError);
+        //     return res.status(500).send("Error uploading folder into storage");
+        // }
 
         res.redirect("/");
   } catch (error) {
@@ -65,7 +65,33 @@ async function folderDelete(req, res) {
             console.error("Error selecting nested folders:", selectError);
             return res.status(500).send("Error finding nested folders");
         }
-        await folderDeleteRecursively(req, nestedFolders);
+
+        const { data: files, error: fileError } = await req.supabaseClient
+                                                                .from('File')
+                                                                .select()
+                                                                .eq('folderid', req.query.id);
+        if (fileError) {
+            console.error("Error selecting nested files:", fileError);
+            return res.status(500).send("Error finding nested files");
+        }
+
+        const { data: parentFolder, error: parentError } = await req.supabaseClient 
+                                                                        .from('Folder')
+                                                                        .select('name')
+                                                                        .eq('id', req.query.id)
+                                                                        .single()
+        if (fileError) {
+            console.error("Error selecting parent folder:", fileError);
+            return res.status(500).send("Error selecting parent folder");
+        }
+        try {
+            await deleteAllFiles(req, files, parentFolder.name);
+            await folderDeleteRecursively(req, nestedFolders);
+        } catch(error) {
+            console.error(error);
+            return res.status(500).send("Error in helper functions");
+        }
+
         const { error: folderError } = await req.supabaseClient.from('Folder').delete().eq('id', req.query.id);
         if (folderError) {
             console.error("Error deleting folder: ", folderError.message);
@@ -90,7 +116,7 @@ async function folderDeleteRecursively(req, folders) {
         if (selectError) {
             console.log(selectError);
             throw selectError;  // Changed from return to throw
-        }
+        }              
         // Recursively call function on nested folders
         await folderDeleteRecursively(req, nestedFolders);
 
@@ -99,7 +125,6 @@ async function folderDeleteRecursively(req, folders) {
                                                 .from('File')
                                                 .select()
                                                 .eq('folderid', folder.id);
-
         if (fileError) {
             console.log(fileError);
             throw fileError;  // Changed from return to throw
@@ -131,7 +156,7 @@ async function deleteAllFiles(req, files, folderName) {
                                                 .eq('id', file.id); 
         if (fileError) {
             console.log(fileError);
-            throw fileError;  // Changed from return to throw
+            throw fileError;
         }
 
         const { error: storageError } = await req.supabaseClient

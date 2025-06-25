@@ -10,7 +10,7 @@ async function uploadPost(req, res) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const uniqueFileName = `${baseName}-${uniqueSuffix}${ext}`;
         const id = crypto.randomUUID();
-        
+
         let folder = "";
         if (req.body.folder) {
             try {
@@ -40,6 +40,7 @@ async function uploadPost(req, res) {
                 storagePath: `${folderName}/${uniqueFileName}`,
                 folderid: folder.id || null,
                 userid: req.user.id,
+                id: id,
              })
         if (error) {
             console.error("error with inserting user: ", error);
