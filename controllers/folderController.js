@@ -1,7 +1,5 @@
-const {createClient} = require('@supabase/supabase-js');
-const { createUserClient } = require('../controllers/createClient');
 require('dotenv').config();
-const path = require("path");
+const { fileDelete } = require("./indexController");
 
 async function folderPost (req, res) {
     try {
@@ -49,10 +47,15 @@ async function folderCreateGet(req, res) {
 }
 
 async function folderDelete(req, res) {
-    try{
-        const response = await req.supabaseClient.from('Folder').delete().eq('id', req.query.id);
-        if (response.error) {
-            console.error("Error deleting folder: ", response.error.message);
+    try{        
+        const { data: nestedFolders, error: selectError } = await req.supabaseClient
+                                                                        .from('Folder')
+                                                                        .select()
+                                                                        .eq('parentid', req.query.id);
+        folderDeleteRecursively(req, res, nestedFolders);
+        const { error: folderError } = await req.supabaseClient.from('Folder').delete().eq('id', req.query.id);
+        if (folderError) {
+            console.error("Error deleting folder: ", folderError.message);
             res.status(500).send("Error deleting folder on the DB side.");
         }
         const referrer = req.get('Referer') || '/';
@@ -63,4 +66,41 @@ async function folderDelete(req, res) {
     }
 }
 
-module.exports = { folderPost, folderCreateGet, folderDelete }
+async function folderDeleteRecursively(req, res, folders) {
+    // base case - ends if no nested folders 
+    if (!folders) return;
+    for (const folder of folders) {
+        const { data: nestedFolders, error: selectError} = await req.supabaseClient
+                                    .from('Folder')
+                                    .select()
+                                    .eq('parentid', folder.id);
+        if (selectError) {
+            console.log(selectError);
+            return res.status(500).send("Error selecting nested folders");
+        }
+        // Recursively call function on nested folders
+        await folderDeleteRecursively(req, res, nestedFolders);
+        // Deletes files inside nested folders
+        const { error: fileError } = await req.supabaseClient
+                                                .from('File')
+                                                .delete()
+                                                .eq('folderid', folder.id);
+        if (fileError) {
+            console.log(fileError);
+            return res.status(500).send("Error deleting nested files");
+        }
+        // deletes nested folder
+        const { error: folderError } = await req.supabaseClient    
+                                            .from('Folder')
+                                            .delete()
+                                            .eq('id', folder.id);
+        if (folderError) {
+            console.log(folderError);
+            return res.status(500).send("Error deleting nested folders");
+        }
+    }
+}
+
+async function folderShare(req, res) {}
+
+module.exports = { folderPost, folderCreateGet, folderDeleteRecursively }

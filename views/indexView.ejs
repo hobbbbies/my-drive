@@ -24,7 +24,7 @@
                             <div class="folder-item" onclick="window.location.href='/root/<%= folder.id %>'">
                                 <div class="file-icon">📂</div>
                                 <div class="file-name"><%= folder.name %></div>
-                                <a href="/delete/folder/?id=<%= folder.id %>" class="delete-folder">Delete</a>
+                                <a href="/folder/delete/?id=<%= folder.id %>" class="delete-folder">Delete</a>
                                 <a href="/share/?id=<%= folder.id %>" class="share-folder">Share</a>
                             </div>
                         <% })%>
