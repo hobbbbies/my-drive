@@ -8,6 +8,8 @@ router.post("/create", userAuth, attachClient, controller.folderPost);
 
 router.get("/create", userAuth, attachClient, controller.folderCreateGet);
 
-// router.get("/:folderId", userAuth, controller.folderGet);
+router.get("/delete/folder", userAuth, attachClient, controller.folderDelete);
+
+router.get("/share")
 
 module.exports = router;

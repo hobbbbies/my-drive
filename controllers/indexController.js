@@ -79,19 +79,5 @@ async function fileDownload(req, res) {
     }
 }
 
-async function folderDelete(req, res) {
-    try{
-        const response = await req.supabaseClient.from('Folder').delete().eq('id', req.query.id);
-        if (response.error) {
-            console.error("Error deleting folder: ", response.error.message);
-            res.status(500).send("Error deleting folder on the DB side.");
-        }
-        const referrer = req.get('Referer') || '/';
-        res.redirect(referrer);
-    } catch(error) {
-        console.error(error);
-        res.status(500).send("Error deleting folder");
-    }
-}
 
-module.exports = { indexGet, fileDelete, fileDownload, folderDelete };
+module.exports = { indexGet, fileDelete, fileDownload };

@@ -538,3 +538,15 @@ body {
     opacity: 1;
 }
 
+.share-folder {
+    position: absolute;
+    top: 25%;
+    right: 6%;
+    visibility: hidden;
+}
+
+.folder-item:hover .share-folder {
+    visibility: visible;
+    opacity: 1;
+}
+
