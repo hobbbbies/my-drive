@@ -1,3 +1,21 @@
+:root {
+  /* Color variables */
+  --color-background: #fff;
+  --color-sidebar-bg: #f8f9fa;
+  --color-border: #dadce0;
+  --color-text-primary: #202124;
+  --color-text-secondary: #5f6368;
+  --color-primary: #1a73e8;
+  --color-primary-light: #e8f0fe;
+  --color-primary-dark: #1565c0;
+  --color-hover: #e8eaed;
+  --color-danger: #ea4335;
+  --color-error-bg: #fce8e6;
+  --color-error-text: #d93025;
+  --color-shadow: rgba(0, 0, 0, 0.12);
+  --color-modal-backdrop: rgba(0, 0, 0, 0.5);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,7 +23,6 @@
 }
 
 body {
-    margin: 0;
     font-family: 'Google Sans', Roboto, Arial, sans-serif;
     display: flex;
 }
@@ -13,11 +30,11 @@ body {
 .sidebar {
     width: 320px;
     height: 100vh;
-    background-color: #f8f9fa;
-    border-right: 1px solid #dadce0;
+    background-color: var(--color-sidebar-bg);
+    border-right: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
-    color: #202124;
+    color: var(--color-text-primary);
     font-family: 'Google Sans', Roboto, Arial, sans-serif;
     padding: 8px;
 }
@@ -42,20 +59,20 @@ body {
     padding: 8px 16px;
     cursor: pointer;
     border-radius: 0 24px 24px 0;
-    margin-right: 12px;
+    /* margin-right: 12px; */
 }
 
-    .nav-item:hover {
-    background-color: #e8eaed;
+.nav-item:hover {
+    background-color: var(--color-hover);
 }
 
 .nav-item.active {
-    background-color: #e8f0fe;
-    color: #1a73e8;
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
 }
 
 .nav-item i {
-    margin-right: 12px;
+    /* margin-right: 12px; */
 }
 
 .nav-item a {
@@ -67,7 +84,7 @@ body {
 
 .sidebar-divider {
     height: 1px;
-    background-color: #dadce0;
+    background-color: var(--color-border);
     margin: 8px 0;
 }
 
@@ -83,7 +100,7 @@ body {
     padding: 8px 16px;
 }
 
-    .folders-header h2 {
+.folders-header h2 {
     margin: 0;
     font-size: 28px;
 } 
@@ -97,12 +114,12 @@ body {
     border-radius: 50%;
     cursor: pointer;
     text-decoration: none;
-    color: #5f6368;
+    color: var(--color-text-secondary);
     font-size: 30px;
 }
 
 .create-folder-btn:hover {
-    background-color: #e8eaed;
+    background-color: var(--color-hover);
 }
 
 .folders-list {
@@ -121,17 +138,17 @@ body {
 }
 
 .sidebar-folder-item:hover {
-    background-color: #e8eaed;
+    background-color: var(--color-hover);
 }
 
 .sidebar-folder-icon {
     margin-right: 12px;
-    color: #5f6368;
+    color: var(--color-text-secondary);
 }
 
 .folder-link {
     text-decoration: none;
-    color: #5f6368;
+    color: var(--color-text-secondary);
     font-size: 24px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -141,19 +158,19 @@ body {
 
 .no-folders {
     padding: 8px 16px;
-    color: #5f6368;
+    color: var(--color-text-secondary);
     font-size: 14px;
     font-style: italic;
 }
 
 .sidebar-footer {
     padding: 16px;
-    border-top: 1px solid #dadce0;
+    border-top: 1px solid var(--color-border);
 }
 
 .storage-bar {
     height: 4px;
-    background-color: #e8eaed;
+    background-color: var(--color-hover);
     border-radius: 2px;
     overflow: hidden;
     margin-bottom: 8px;
@@ -161,13 +178,13 @@ body {
 
 .storage-used {
     height: 100%;
-    background-color: #1a73e8;
+    background-color: var(--color-primary);
 }
 
 .storage-text {
     margin: 0;
     font-size: 12px;
-    color: #5f6368;
+    color: var(--color-text-secondary);
 }
 
 .app-container {
@@ -177,7 +194,6 @@ body {
 
 .content {
     flex-grow: 1;
-    padding: 20px;
     overflow-y: auto;
 }
 
@@ -189,7 +205,7 @@ body {
 }
 
 .upload-btn {
-    background-color: #1a73e8;
+    background-color: var(--color-primary);
     color: white;
     padding: 8px 16px;
     border-radius: 4px;
@@ -204,7 +220,7 @@ body {
 }
 
 .file-item, .folder-item {
-    border: 1px solid #dadce0;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 16px;
     cursor: pointer;
@@ -213,12 +229,13 @@ body {
 
 .folder-item {
     display: grid;    
+    position: relative;
 }
 
 .file-item:hover, .folder-item:hover {
     background-color: #f5f5f5;
-    border-color: #1a73e8;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    border-color: var(--color-primary);
+    box-shadow: 0 1px 3px var(--color-shadow);
 }
 
 .file-icon, .folder-icon {
@@ -236,7 +253,7 @@ body {
 
 .empty-state {
     text-align: center;
-    color: #5f6368;
+    color: var(--color-text-secondary);
     margin-top: 48px;
 }
 
@@ -244,18 +261,25 @@ body {
     width: 100%;
 }
 
+/* Modified to make the welcome part match sidebar */
+.header h1 {
+    background-color: var(--color-sidebar-bg);
+    color: var(--color-text-secondary);
+    padding: 20px;
+}
+
 .bottom-header {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    padding: 10px;
+    padding: 20px;
 }
 
 .sidebar-logo {
     display: flex;
     align-items: center;
     padding: 16px;
-    border-bottom: 1px solid #dadce0;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .sidebar-logo img {
@@ -266,7 +290,7 @@ body {
 .sidebar-logo h1 {
     font-size: 18px;
     font-weight: 500;
-    color: #1a73e8;
+    color: var(--color-primary);
     margin: 0;
 }
 
@@ -288,7 +312,7 @@ body {
 
 .file-item:hover {
     background-color: #f5f5f5;
-    border-color: #1a73e8;
+    border-color: var(--color-primary);
 }
 
 .modal {
@@ -300,11 +324,11 @@ body {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-modal-backdrop);
 }
 
 .modal-content {
-  background-color: #fff;
+  background-color: var(--color-background);
   margin: 10% auto;
   width: 450px;
   border-radius: 8px;
@@ -313,26 +337,24 @@ body {
   padding: 0; /* Remove existing padding */
 }
 
-/* Keep your existing close button styles but adjust position */
 .close {
     position: absolute;
     top: 10px;
     right: 16px;
     font-size: 28px;
     font-weight: bold;
-    color: #5f6368;
+    color: var(--color-text-secondary);
     text-decoration: none;
     cursor: pointer;
 }
 
 .close:hover {
-    color: #202124;
+    color: var(--color-text-primary);
 }
 
-/* Add these new modal section styles */
 .modal-header {
     padding: 16px 24px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -343,7 +365,7 @@ body {
     margin: 0;
     font-size: 18px;
     font-weight: 500;
-    color: #202124;
+    color: var(--color-text-primary);
 }
 
 .modal-body {
@@ -363,16 +385,16 @@ body {
 .detail-label {
     width: 80px;
     font-weight: 500;
-    color: #5f6368;
+    color: var(--color-text-secondary);
 }
 
 .detail-value {
-    color: #202124;
+    color: var(--color-text-primary);
 }
 
 .modal-footer {
     padding: 16px 24px;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--color-border);
     display: flex;
     justify-content: flex-end;
     gap: 12px;
@@ -388,12 +410,12 @@ body {
 }
 
 .modal-button.primary {
-    background-color: #1a73e8;
+    background-color: var(--color-primary);
     color: white;
 }
 
 .modal-button.danger {
-    background-color: #ea4335;
+    background-color: var(--color-danger);
     color: white;
 }
 
@@ -406,7 +428,7 @@ body {
     max-width: 450px;
     margin: 80px auto;
     border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 4px var(--color-shadow);
     padding: 48px;
     background-color: white;
 }
@@ -426,7 +448,7 @@ body {
 .auth-header h1 {
     font-size: 24px;
     font-weight: 500;
-    color: #202124;
+    color: var(--color-text-primary);
     margin: 0;
 }
 
@@ -445,24 +467,24 @@ body {
 .form-group label {
     font-size: 14px;
     font-weight: 500;
-    color: #5f6368;
+    color: var(--color-text-secondary);
 }
 
 .form-group input {
     padding: 12px;
-    border: 1px solid #dadce0;
+    border: 1px solid var(--color-border);
     border-radius: 4px;
     font-size: 16px;
     transition: border-color 0.2s;
 }
 
 .form-group input:focus {
-    border-color: #1a73e8;
+    border-color: var(--color-primary);
     outline: none;
 }
 
 .auth-button {
-    background-color: #1a73e8;
+    background-color: var(--color-primary);
     color: white;
     border: none;
     padding: 12px;
@@ -475,18 +497,18 @@ body {
 }
 
 .auth-button:hover {
-    background-color: #1565c0;
+    background-color: var(--color-primary-dark);
 }
 
 .auth-link {
     margin-top: 24px;
     text-align: center;
     font-size: 14px;
-    color: #5f6368;
+    color: var(--color-text-secondary);
 }
 
 .auth-link a {
-    color: #1a73e8;
+    color: var(--color-primary);
     text-decoration: none;
     font-weight: 500;
 }
@@ -496,12 +518,23 @@ body {
 }
 
 .error-message {
-    background-color: #fce8e6;
-    color: #d93025;
+    background-color: var(--color-error-bg);
+    color: var(--color-error-text);
     padding: 12px;
     border-radius: 4px;
     margin-bottom: 16px;
     font-size: 14px;
 }
 
+.delete-folder {
+    position: absolute;
+    top: 6%;
+    right: 6%;
+    visibility: hidden;
+}
+
+.folder-item:hover .delete-folder {
+    visibility: visible;
+    opacity: 1;
+}
 

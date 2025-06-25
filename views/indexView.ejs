@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <%- include('sidebar', { headerTitle: headerTitle, folders: folders || []}) %>
+    <%- include('sidebar', { headerTitle: headerTitle, folders: rootFolders|| []}) %>
     <main class="content">
         <div class="content-header">
             <%- include('header', { user: user}) %>
@@ -24,6 +24,7 @@
                             <div class="folder-item" onclick="window.location.href='/root/<%= folder.id %>'">
                                 <div class="file-icon">📂</div>
                                 <div class="file-name"><%= folder.name %></div>
+                                <a href="/delete/folder/?id=<%= folder.id %>" class="delete-folder">X</a>
                             </div>
                         <% })%>
                     <% }%>

@@ -10,6 +10,8 @@ router.get("/root/:folderid", userAuth, attachClient, controller.indexGet);
 
 router.get("/delete", userAuth, attachClient, controller.fileDelete);
 
+router.get("/delete/folder", userAuth, attachClient, controller.folderDelete);
+
 router.get("/download", userAuth, attachClient, controller.fileDownload)
 
 module.exports = router;

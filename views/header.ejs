@@ -1,10 +1,9 @@
 <header class="header">
-    <% if (locals.user) { %>
-        <h2>Welcome, <%= user.name%></h2>
-    <% } %>
+    <h1><%= headerTitle %></h1>
     <div class="bottom-header">
-        <h1><%= headerTitle %></h1>
-        <p>MyDrive</p>
+        <% if (locals.user) { %>
+            <h2>Welcome, <%= user.name%></h2>
+         <% } %>
         <a href="/upload" class="upload-btn">Upload file</a>
     </div>
 </header>

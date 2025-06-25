@@ -25,6 +25,7 @@ async function indexGet(req, res) {
     }
 
     let nestedFolders;
+    const rootFolders = folders.filter((folder) => folder.parentid === null);;
     if (folderid) {
         const { data: chosenFolder} = await req.supabaseClient
                             .from("Folder")
@@ -33,10 +34,10 @@ async function indexGet(req, res) {
                             .single();
         nestedFolders = folders.filter((folder) => folder.parentid === folderid);
     } else {
-        nestedFolders = folders.filter((folder) => folder.parentid === null);
+        nestedFolders = rootFolders;
     }
    
-    res.render('indexView', { headerTitle: "MyDrive", folders: folders, files: files, nestedFolders: nestedFolders, user: req.user });
+    res.render('indexView', { headerTitle: "MyDrive", rootFolders: rootFolders, files: files, nestedFolders: nestedFolders, user: req.user });
 }
 
 async function fileDelete(req, res) {
@@ -78,4 +79,19 @@ async function fileDownload(req, res) {
     }
 }
 
-module.exports = { indexGet, fileDelete, fileDownload };
+async function folderDelete(req, res) {
+    try{
+        const response = await req.supabaseClient.from('Folder').delete().eq('id', req.query.id);
+        if (response.error) {
+            console.error("Error deleting folder: ", response.error.message);
+            res.status(500).send("Error deleting folder on the DB side.");
+        }
+        const referrer = req.get('Referer') || '/';
+        res.redirect(referrer);
+    } catch(error) {
+        console.error(error);
+        res.status(500).send("Error deleting folder");
+    }
+}
+
+module.exports = { indexGet, fileDelete, fileDownload, folderDelete };
