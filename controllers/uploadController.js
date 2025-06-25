@@ -9,6 +9,7 @@ async function uploadPost(req, res) {
         const baseName = path.basename(file.originalname, ext);
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const uniqueFileName = `${baseName}-${uniqueSuffix}${ext}`;
+        const id = crypto.randomUUID();
         
         let folder = "";
         if (req.body.folder) {
@@ -23,7 +24,7 @@ async function uploadPost(req, res) {
         const { data, error: uploadError } = await req.supabaseClient
             .storage
             .from('uploads') // Replace with your actual bucket name
-            .upload(`${folderName}/${uniqueFileName}`, file.buffer);
+            .upload(`${folderName}/${id}`, file.buffer);
             
         if (uploadError) {
             console.error("Storage upload error:", uploadError);

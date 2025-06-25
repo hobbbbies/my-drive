@@ -111,7 +111,7 @@
                 modalExt.textContent = fileExt || "--";
                 modalAdded.textContent = trimmedAdded || "--";
 
-                downloadLink.setAttribute("href", `/download/?path=${storagePath}&fileName=${fileName}&ext=${fileExt}`);
+                downloadLink.setAttribute("href", `/download/?id=${fileid}`);
                 deleteLink.setAttribute("href", `/delete/?id=${fileid}`);
 
                 // Show the modal
