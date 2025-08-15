@@ -20,15 +20,14 @@ fileItems.forEach((item) => {
         
         // Get file metadata from data attributes
         const fileName = item.getAttribute("data-filename");
-        const uniqueFileName = item.getAttribute("data-uniqueFileName");
+        const storagePath = item.getAttribute("data-storagePath");
         const fileSize = item.getAttribute("data-size");
         const fileExt = item.getAttribute("data-ext");
         const fileAdded = item.getAttribute("data-added");
         const folderid = item.getAttribute("data-folderid");
-        const storagePath = item.getAttribute("data-storagePath");
         
-        // Store file info for sharing
-        currentFileForSharing = { uniqueFileName, name: fileName };
+        // Store file info for sharing (use storagePath as unique identifier)
+        currentFileForSharing = { path: storagePath, name: fileName };
         
         const trimmedAdded = new Date(fileAdded).toLocaleDateString();
         // Update modal content
@@ -37,9 +36,9 @@ fileItems.forEach((item) => {
         modalExt.textContent = fileExt || "--";
         modalAdded.textContent = trimmedAdded || "--";
 
-        console.log(uniqueFileName);
-        downloadLink.setAttribute("href", `/download/?uniqueFileName=${uniqueFileName}`);
-        deleteLink.setAttribute("href", `/delete/?uniqueFileName=${uniqueFileName}`);
+        console.log("Storage Path:", storagePath);
+        downloadLink.setAttribute("href", `/download/?storagePath=${encodeURIComponent(storagePath)}`);
+        deleteLink.setAttribute("href", `/delete/?storagePath=${encodeURIComponent(storagePath)}`);
 
         // Show the modal
         modal.style.display = "block";
@@ -61,7 +60,7 @@ window.onclick = (event) => {
 
 // Share from modal function
 function shareFromModal() {
-    if (currentFileForSharing.uniqueFileName && currentFileForSharing.name) {
+    if (currentFileForSharing.path && currentFileForSharing.name) {
         // Close file details modal
         modal.style.display = "none";
         // Open share modal (function from shareModal.js)

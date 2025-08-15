@@ -38,16 +38,45 @@ async function indexGet(req, res) {
         nestedFolders = rootFolders;
     }
    
-    res.render('indexView', { headerTitle: "MyDrive", rootFolders: rootFolders, files: files, nestedFolders: nestedFolders, user: req.user });
+    res.render('indexView', { headerTitle: "MyDrive", rootFolders: rootFolders, files: files, nestedFolders: nestedFolders, user: req.user, chosenFolder: chosenFolder });
 }
 
 async function fileDelete(req, res) {
     try{
-        const response = await req.supabaseClient.from('File').delete().eq('uniqueFileName', req.query.uniqueFileName);
-        if (response.error) {
-            console.error("Error deleting file: ", response.error.message);
-            res.status(500).send("Error deleting file on the DB side.");
+        // First, get the file info from database to get the storage path
+        const { data: fileInfo, error: fetchError } = await req.supabaseClient
+            .from('File')
+            .select('storagePath')
+            .eq('storagePath', req.query.storagePath)
+            .single();
+            
+        if (fetchError || !fileInfo) {
+            console.error("Error fetching file info: ", fetchError);
+            return res.status(404).send("File not found");
         }
+
+        // Delete from database first
+        const { error: dbError} = await req.supabaseClient
+            .from('File')
+            .delete()
+            .eq('storagePath', req.query.storagePath);
+            
+        if (dbError) {
+            console.error("Error deleting file from DB: ", dbError.message);
+            return res.status(400).send("Error deleting file from database");
+        }
+
+        // Delete from storage using the storage path
+        const { error: storageError } = await req.supabaseClient
+            .storage
+            .from('uploads')
+            .remove([fileInfo.storagePath]);
+            
+        if (storageError) {
+            console.error("Error deleting from storage: ", storageError.message);
+            console.error("Warning: File deleted from DB but not from storage");
+        }
+        
         const referrer = req.get('Referer') || '/';
         res.redirect(referrer);
     } catch(error) {
@@ -58,28 +87,40 @@ async function fileDelete(req, res) {
 
 async function fileDownload(req, res) {
     try{
-        console.log('req query path: ', req.query.uniqueFileName);
+        // Get file info from database first
+        const { data: fileInfo, error: fetchError } = await req.supabaseClient
+            .from('File')
+            .select('name, extension, storagePath, mimetype')
+            .eq('storagePath', req.query.storagePath)
+            .single();
+            
+        if (fetchError || !fileInfo) {
+            console.error("Error fetching file info: ", fetchError);
+            return res.status(404).send("File not found");
+        }
+
+        // Download using the stored path
         const { data, error } = await req.supabaseClient
-                                    .storage
-                                    .from('uploads')
-                                    .download(req.query.uniqueFileName);
+            .storage
+            .from('uploads')
+            .download(fileInfo.storagePath);
+            
         if (error) {
             console.error("Error downloading file: ", error.message);
-            return res.status(500).send("Error downloading file on the server side.");
-        } 
+            return res.status(500).send("Error downloading file from storage");
+        }
 
         const buffer = Buffer.from(await data.arrayBuffer());
-        res.setHeader('Content-Disposition', `attachment; filename="${req.query.fileName}${req.query.ext}"`);
-        res.setHeader('Content-Type', 'application/octet-stream');
+        const filename = `${fileInfo.name}${fileInfo.extension}`;
+        
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', fileInfo.mimetype || 'application/octet-stream');
         res.send(buffer);
 
-        // const referrer = req.get('Referer') || '/';
-        // res.redirect(referrer);
     } catch(error) {
         console.error(error);
         res.status(500).send("Error downloading file");
     }
 }
-
 
 module.exports = { indexGet, fileDelete, fileDownload };

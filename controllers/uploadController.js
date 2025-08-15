@@ -30,17 +30,17 @@ async function uploadPost(req, res) {
                 folder = "";
             }
         }
-        const folderName = folder ? folder.name : ""
-        const storagePath = `${folderName}/${uniqueFileName}`;
 
-        // Upload to storage first
+        const folderName = folder ? folder.name : ""
+        const storagePath = folderName ? `${folderName}/${uniqueFileName}` : uniqueFileName;
+
         const { data, error: uploadError } = await req.supabaseClient
             .storage
             .from('uploads')    
             .upload(storagePath, file.buffer, {
                 contentType: file.mimetype,
                 upsert: false
-            });
+        });
         
         if (uploadError) {
             console.error("Storage upload error:", uploadError);
@@ -51,14 +51,13 @@ async function uploadPost(req, res) {
         const { error: dbError } = await req.supabaseClient
             .from('File')
             .insert({ 
-                name: originalBaseName, // Store original name for display
+                name: originalBaseName, 
                 size: file.size,
                 extension: ext,
                 // mimetype: file.mimetype,
-                storagePath: storagePath,
+                storagePath: storagePath, // Only store storagePath
                 folderid: folder.id || null,
-                userid: req.user.id,
-                uniqueFileName
+                userid: req.user.id
              });
              
         if (dbError) {
