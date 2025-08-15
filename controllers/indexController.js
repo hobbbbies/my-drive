@@ -58,13 +58,14 @@ async function fileDelete(req, res) {
 
 async function fileDownload(req, res) {
     try{
+        console.log('req query path: ', req.query.id);
         const { data, error } = await req.supabaseClient
                                     .storage
                                     .from('uploads')
-                                    .download(req.query.path);
+                                    .download(req.query.id);
         if (error) {
-            console.error("Error deleting file: ", response.error.message);
-            res.status(500).send("Error deleting file on the DB side.");
+            console.error("Error downloading file: ", error.message);
+            return res.status(500).send("Error downloading file on the server side.");
         } 
 
         const buffer = Buffer.from(await data.arrayBuffer());
