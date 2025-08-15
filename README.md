@@ -8,7 +8,7 @@ It’s a **mock cloud storage platform** — similar in spirit to Google Drive �
 
 ---
 
-## ✨ Features  
+## 🗂️ Features  
 
 - **CRUD Operations** for both files and folders  
 - **Secure Authentication** using Supabase Auth  
