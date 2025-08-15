@@ -20,15 +20,15 @@ fileItems.forEach((item) => {
         
         // Get file metadata from data attributes
         const fileName = item.getAttribute("data-filename");
+        const uniqueFileName = item.getAttribute("data-uniqueFileName");
         const fileSize = item.getAttribute("data-size");
         const fileExt = item.getAttribute("data-ext");
         const fileAdded = item.getAttribute("data-added");
-        const fileid = item.getAttribute("data-id");
         const folderid = item.getAttribute("data-folderid");
         const storagePath = item.getAttribute("data-storagePath");
         
         // Store file info for sharing
-        currentFileForSharing = { id: fileid, name: fileName };
+        currentFileForSharing = { uniqueFileName, name: fileName };
         
         const trimmedAdded = new Date(fileAdded).toLocaleDateString();
         // Update modal content
@@ -37,8 +37,9 @@ fileItems.forEach((item) => {
         modalExt.textContent = fileExt || "--";
         modalAdded.textContent = trimmedAdded || "--";
 
-        downloadLink.setAttribute("href", `/download/?id=${fileid}`);
-        deleteLink.setAttribute("href", `/delete/?id=${fileid}`);
+        console.log(uniqueFileName);
+        downloadLink.setAttribute("href", `/download/?uniqueFileName=${uniqueFileName}`);
+        deleteLink.setAttribute("href", `/delete/?uniqueFileName=${uniqueFileName}`);
 
         // Show the modal
         modal.style.display = "block";
@@ -60,7 +61,7 @@ window.onclick = (event) => {
 
 // Share from modal function
 function shareFromModal() {
-    if (currentFileForSharing.id && currentFileForSharing.name) {
+    if (currentFileForSharing.uniqueFileName && currentFileForSharing.name) {
         // Close file details modal
         modal.style.display = "none";
         // Open share modal (function from shareModal.js)
