@@ -60,18 +60,12 @@ npm install
 Create a `.env` file in the project root:
 
 ```env
-# Supabase configuration
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Optional: Service role key for admin-only server tasks (NEVER expose to client)
-# SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# App configuration
-PORT=3000
-NODE_ENV=development
-SESSION_SECRET=your_random_session_secret
-
+PORT="3000"
+SUPABASE_DATABASE_URL="postgresql://<DB_USER>:<DB_PASSWORD>@<HOST>:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://<DB_USER>:<DB_PASSWORD>@<HOST>:5432/postgres"
+SUPABASE_API_KEY="<YOUR_SUPABASE_API_KEY>"
+SUPABASE_URL="https://<YOUR_PROJECT_REF>.supabase.co"
+```
 
 ### 3. Run localhost
 
