@@ -663,3 +663,159 @@ body {
     }
 }
 
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    border: 1px solid #c3e6cb;
+}
+
+/* Share Modal Styles */
+.share-modal-content {
+    width: 500px;
+    max-width: 90vw;
+}
+
+.share-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.email-input-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.email-input-container input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.send-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.send-btn:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.send-btn:disabled {
+    background-color: var(--color-text-secondary);
+    cursor: not-allowed;
+}
+
+.permissions-section {
+    border-top: 1px solid var(--color-border);
+    padding-top: 16px;
+}
+
+.share-link-section {
+    border-top: 1px solid var(--color-border);
+    padding-top: 16px;
+}
+
+.share-link-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.link-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.link-container input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-sidebar-bg);
+    font-size: 14px;
+}
+
+.copy-btn {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.copy-btn:hover {
+    background-color: var(--color-hover);
+}
+
+.link-description {
+    margin: 8px 0 0 0;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+/* Share/Delete buttons on items */
+.delete-folder, .share-folder, .share-file {
+    position: absolute;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+
+.delete-folder {
+    top: 8px;
+    right: 8px;
+    color: var(--color-danger);
+}
+
+.share-folder, .share-file {
+    top: 8px;
+    right: 44px;
+    color: var(--color-primary);
+}
+
+.folder-item:hover .delete-folder,
+.folder-item:hover .share-folder,
+.file-item:hover .share-file {
+    opacity: 1;
+}
+
+.delete-folder:hover {
+    background-color: var(--color-error-bg);
+    border-color: var(--color-danger);
+}
+
+.share-folder:hover, .share-file:hover {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary);
+}
+
+/* Ensure folder/file items have relative positioning */
+.folder-item, .file-item {
+    position: relative;
+}

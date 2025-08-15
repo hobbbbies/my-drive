@@ -3,40 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - MyDrive</title>
+    <title>Forgot Password - MyDrive</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-header">
             <img src="/images/logo.png" alt="MyDrive Logo" width="48">
-            <h1>Sign in to MyDrive</h1>
+            <h1>Reset your password</h1>
+            <p>Enter your email address and we'll send you a link to reset your password.</p>
         </div>
         
         <% if (locals.error) { %>
             <div class="error-message"><%= error %></div>
         <% } %>
         
-        <form class="auth-form" action="/auth/login" method="post">
+        <% if (locals.success) { %>
+            <div class="success-message"><%= success %></div>
+        <% } %>
+        
+        <form class="auth-form" action="/auth/forgot-password" method="post">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>
             </div>
             
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            
-            <button type="submit" class="auth-button">Sign in</button>
+            <button type="submit" class="auth-button">Send Reset Link</button>
         </form>
         
         <div class="auth-link">
-            <p><a href="/auth/forgot-password">Forgot your password?</a></p>
-        </div>
-        
-        <div class="auth-link">
-            <p>Don't have an account? <a href="/auth/signup">Sign up</a></p>
+            <p>Remember your password? <a href="/auth/login">Sign in</a></p>
         </div>
     </div>
 </body>

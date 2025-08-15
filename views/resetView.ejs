@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - MyDrive</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <img src="/images/logo.png" alt="MyDrive Logo" width="48">
+            <h1>Set new password</h1>
+            <p>Enter your new password below.</p>
+        </div>
+        
+        <% if (locals.error) { %>
+            <div class="error-message"><%= error %></div>
+        <% } %>
+        
+        <div id="loading" style="text-align: center; padding: 20px;">
+            <p>Verifying reset link...</p>
+        </div>
+        
+        <form class="auth-form" action="/auth/reset-password" method="post" id="resetForm" style="display: none;">
+            <input type="hidden" name="access_token" id="access_token">
+            <input type="hidden" name="refresh_token" id="refresh_token">
+            
+            <div class="form-group">
+                <label for="password">New Password</label>
+                <input type="password" id="password" name="password" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
+            </div>
+            
+            <button type="submit" class="auth-button">Update Password</button>
+        </form>
+        
+        <div class="auth-link">
+            <p><a href="/auth/login">Back to Sign in</a></p>
+        </div>
+        
+        <div id="error-container" style="display: none;">
+            <div class="error-message" id="error-message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Extract tokens from URL fragment
+        function getFragmentParams() {
+            const fragment = window.location.hash.substring(1);
+            const params = new URLSearchParams(fragment);
+            return {
+                access_token: params.get('access_token'),
+                refresh_token: params.get('refresh_token'),
+                type: params.get('type'),
+                expires_at: params.get('expires_at')
+            };
+        }
+
+        // Check if we have valid tokens
+        function validateTokens() {
+            const params = getFragmentParams();
+            
+            if (!params.access_token || !params.refresh_token || params.type !== 'recovery') {
+                showError('Invalid reset link. Please request a new password reset.');
+                return false;
+            }
+            
+            // Check if token is expired
+            if (params.expires_at) {
+                const expiresAt = parseInt(params.expires_at) * 1000; // Convert to milliseconds
+                if (Date.now() > expiresAt) {
+                    showError('Reset link has expired. Please request a new password reset.');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('resetForm').style.display = 'none';
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-container').style.display = 'block';
+        }
+
+        function showForm() {
+            const params = getFragmentParams();
+            document.getElementById('access_token').value = params.access_token;
+            document.getElementById('refresh_token').value = params.refresh_token;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('resetForm').style.display = 'block';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (validateTokens()) {
+                showForm();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <%- include('sidebar', { headerTitle: "Upload", folders: folders || []}) %>
+    <%- include('./partials/sidebar', { headerTitle: "Upload", folders: folders || []}) %>
     <main class="content">
         <div class="content-header">
-            <%- include('header', { headerTitle: "Upload File", user: user || {} }) %>
+            <%- include('./partials/header', { headerTitle: "Upload File", user: user || {} }) %>
         </div>
         
         <div class="form-container">

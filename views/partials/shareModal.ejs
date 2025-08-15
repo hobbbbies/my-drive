@@ -1,0 +1,47 @@
+<!-- Share Modal -->
+<div id="shareModal" class="modal">
+    <div class="modal-content share-modal-content">
+        <div class="modal-header">
+            <h2 id="share-modal-title">Share "Filename"</h2>
+            <a class="close" href="#" onclick="closeShareModal()">×</a>
+        </div>
+        <div class="modal-body">
+            <div class="share-form">
+                <div class="form-group">
+                    <label for="shareEmail">Add people and groups</label>
+                    <div class="email-input-container">
+                        <input type="email" id="shareEmail" name="shareEmail" placeholder="Enter email address" required>
+                        <button type="button" id="sendShareBtn" class="send-btn" onclick="sendShare()">Send</button>
+                    </div>
+                </div>
+                
+                <div class="permissions-section">
+                    <div class="form-group">
+                        <label for="permissions">Permissions</label>
+                        <select id="permissions" name="permissions" class="form-select">
+                            <option value="view">Can view</option>
+                            <option value="edit">Can edit</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="share-link-section">
+                    <h3>Get link</h3>
+                    <div class="link-container">
+                        <input type="text" id="shareLink" readonly placeholder="Generating link...">
+                        <button type="button" onclick="copyShareLink()" class="copy-btn">Copy</button>
+                    </div>
+                    <p class="link-description">Anyone with the link can view</p>
+                </div>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div id="shareSuccess" class="success-message" style="display: none;">
+                Email sent successfully!
+            </div>
+            <div id="shareError" class="error-message" style="display: none;">
+                Failed to send email. Please try again.
+            </div>
+        </div>
+    </div>
+</div>
