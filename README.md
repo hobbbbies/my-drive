@@ -67,7 +67,8 @@ npm install
 Create a `.env` file in the project root:
 
 ```env
-PORT="3000"
+PORT="port_for_server"
+SECRET="secret_for_express_sessions"
 SUPABASE_DATABASE_URL="postgresql://<DB_USER>:<DB_PASSWORD>@<HOST>:6543/postgres?pgbouncer=true"
 DIRECT_URL="postgresql://<DB_USER>:<DB_PASSWORD>@<HOST>:5432/postgres"
 SUPABASE_API_KEY="<YOUR_SUPABASE_API_KEY>"

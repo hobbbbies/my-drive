@@ -90,7 +90,7 @@ async function fileDownload(req, res) {
         // Get file info from database first
         const { data: fileInfo, error: fetchError } = await req.supabaseClient
             .from('File')
-            .select('name, extension, storagePath, mimetype')
+            .select('name, extension, storagePath')
             .eq('storagePath', req.query.storagePath)
             .single();
             
@@ -114,7 +114,7 @@ async function fileDownload(req, res) {
         const filename = `${fileInfo.name}${fileInfo.extension}`;
         
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', fileInfo.mimetype || 'application/octet-stream');
+        res.setHeader('Content-Type: application/octet-stream');
         res.send(buffer);
 
     } catch(error) {

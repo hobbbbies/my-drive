@@ -6,9 +6,6 @@ const path = require('path');
 function sanitizeFilename(filename) {
     return filename
         .replace(/[^\w\s.-]/g, '') // Remove special characters except word chars, spaces, dots, hyphens
-        .replace(/\s+/g, '_')      // Replace spaces with underscores
-        .replace(/_{2,}/g, '_')    // Replace multiple underscores with single
-        .trim();                   // Remove leading/trailing whitespace
 }
 
 async function uploadPost(req, res) {
@@ -54,7 +51,6 @@ async function uploadPost(req, res) {
                 name: originalBaseName, 
                 size: file.size,
                 extension: ext,
-                // mimetype: file.mimetype,
                 storagePath: storagePath, // Only store storagePath
                 folderid: folder.id || null,
                 userid: req.user.id
