@@ -4,7 +4,7 @@
 
 It’s a **mock cloud storage platform** — similar in spirit to Google Drive — that lets you **create, read, update, and delete (CRUD)** both **files and folders**, while ensuring everything is **securely protected**.  
 
-🔗 **Live Demo:** [my-drive-qr71.onrender.com](https://my-drive-qr71.onrender.com/) *(may take up to a minute to load)*  
+🔗 **Live Demo:** [my-drive-qr71.onrender.com](https://my-drive-qr71.onrender.com/) 
 
 ---
 
@@ -21,9 +21,16 @@ It’s a **mock cloud storage platform** — similar in spirit to Google Drive �
 
 ## 🔒 Security  
 
-- **Supabase Row Level Security (RLS)** ensures that uploaded files are accessible only to their owners.  
-- All operations are protected via **auth middleware**.  
-- No public access to stored files unless explicitly shared.  
+MyDrive uses **Supabase Row Level Security (RLS)** to ensure that users can only access their own files and folders.  
+This is achieved by creating database policies that check the authenticated user's `auth.uid()` against the `owner_id` column in each table.
+
+**Key points:**
+- Every file and folder record includes a `userid` field.
+- All read, write, update, and delete operations are restricted to the owner.
+- Without a valid session or JWT, access is denied at the database level.
+- Even if an endpoint is exposed, RLS prevents unauthorized data access.
+
+
 
 ---
 
@@ -72,13 +79,3 @@ SUPABASE_URL="https://<YOUR_PROJECT_REF>.supabase.co"
 node app.js
 
 ## 🔒 Row Level Security (RLS)
-
-MyDrive uses **Supabase Row Level Security (RLS)** to ensure that users can only access their own files and folders.  
-This is achieved by creating database policies that check the authenticated user's `auth.uid()` against the `owner_id` column in each table.
-
-**Key points:**
-- Every file and folder record includes an `owner_id` field.
-- All read, write, update, and delete operations are restricted to the owner.
-- Without a valid session or JWT, access is denied at the database level.
-- Even if an endpoint is exposed, RLS prevents unauthorized data access.
-
