@@ -1,5 +1,5 @@
 
-const {createUserClient} = require('../controllers/createClient');
+const {createUserClient} = require('./createClient');
 
 async function attachClient(req, res, next) {
     const accessToken = req.session?.supabase?.access_token;

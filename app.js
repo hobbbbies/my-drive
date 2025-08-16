@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 3000;
 const path = require('path');
 
 const indexRouter = require("./routes/indexRouter");
-const uploadRouter = require("./routes/uploadRouter");
+const fileRouter = require("./routes/fileRouter");
 const authRouter = require("./routes/authRouter");
 const folderRouter = require("./routes/folderRouter");
 
@@ -42,7 +42,7 @@ app.use(session({
 }));
 
 app.use("/", indexRouter);
-app.use("/upload", uploadRouter);
+app.use("/upload", fileRouter);
 app.use("/auth", authRouter);
 app.use("/folder", folderRouter);
 

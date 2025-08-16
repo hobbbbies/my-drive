@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controllers/folderController")
-const userAuth = require('../controllers/authMiddleware');
-const attachClient = require('../controllers/attachClient');
+const userAuth = require('../middleware/authMiddleware');
+const attachClient = require('../middleware/attachClient');
 
 router.post("/create", userAuth, attachClient, controller.folderPost);
 

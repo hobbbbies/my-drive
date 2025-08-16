@@ -10,7 +10,7 @@ const fileItems = document.querySelectorAll(".file-item");
 const closeBtn = document.querySelector(".close");
 
 // Store current file info for sharing
-let currentFileForSharing = { id: null, name: null };
+let currentFileForSharing = { path: null, name: null };
 
 // File item click handlers
 fileItems.forEach((item) => {
@@ -58,13 +58,15 @@ window.onclick = (event) => {
     }
 };
 
-// Share from modal function
-function shareFromModal() {
+/**
+ * Opens share modal and closes the file details modal
+ * @param {string} type - The type of item being shared ('file' or 'folder')
+ */
+function shareFromModal(type) {
     if (currentFileForSharing.path && currentFileForSharing.name) {
         // Close file details modal
         modal.style.display = "none";
-        // Open share modal (function from shareModal.js)
-        openShareModal(currentFileForSharing.id, currentFileForSharing.name, 'file');
+        openShareModal(currentFileForSharing.path, currentFileForSharing.name, 'file');
     }
 }
 

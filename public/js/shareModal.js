@@ -42,6 +42,11 @@ async function sendShare() {
         return;
     }
 
+    if (!type) {
+        console.error("No type specified for sharing");
+        return;
+    }
+
     const sendBtn = document.getElementById('sendShareBtn');
     sendBtn.disabled = true;
     sendBtn.textContent = 'Sending...';

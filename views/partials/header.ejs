@@ -1,9 +1,27 @@
 <header class="header">
     <h1><%= headerTitle %></h1>
     <div class="bottom-header">
-        <% if (locals.user) { %>
-            <h2>Welcome, <%= user.name%></h2>
-         <% } %>
+        <div class="header-left">
+            <% if (locals.user) { %>
+                <h2>Welcome, <%= user.name%></h2>
+            <% } %>
+            <% if (locals.parentFolders && parentFolders.length > 0) { %>
+                <div class="breadcrumb">
+                    <a href="/">Home</a>
+                    <% parentFolders.forEach((folder, index) => { %>
+                        <span class="separator">/</span>
+                        <% if (index === parentFolders.length - 1) { %>
+                            <!-- Current folder - not clickable -->
+                            <span class="current-folder"><%= folder.name %></span>
+                        <% } else { %>
+                            <!-- Parent folder - clickable -->
+                            <a href="/root/<%= folder.id %>"><%= folder.name %></a>
+                        <% } %>
+                    <% }); %>
+                </div>
+            <% } else { %>
+            <% } %>
+        </div>
         <div class="header-buttons">
             <a href="/auth/login" class="upload-btn">Log out</a>
             <a href="/upload" class="upload-btn">Upload file</a>

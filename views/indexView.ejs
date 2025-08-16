@@ -8,17 +8,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <%- include('partials/sidebar', { headerTitle: headerTitle, folders: rootFolders|| []}) %>
+    <%- include('partials/sidebar', { headerTitle: headerTitle, folders : rootFolders || []}) %>
     <main class="content">
         <div class="content-header">
-            <%- include('partials/header', { user: user}) %>
+            <%- include('partials/header', { user: user }) %>
         </div>
         
         <div class="files-container">
             <!-- Future implentation: path will be rendered here -->
-                <% if (locals.chosenFolder) { %>
-                    <p><%= chosenFolder.name %></p>
-                <% } %>
                 <div class="files-grid">
                     <%if (locals.nestedFolders){ %>
                         <% nestedFolders.forEach((folder) => { %>
@@ -83,7 +80,7 @@
             </div>
             <div class="modal-footer">
                 <a id="download-link" class="modal-button primary" href="#">Download</a>
-                <button id="share-link" class="modal-button secondary" onclick="shareFromModal()">Share</button>
+                <button id="share-link" class="modal-button secondary" onclick="shareFromModal('file')">Share</button>
                 <a id="delete-link" class="modal-button danger" href="#">Delete</a>
             </div>
         </div>
