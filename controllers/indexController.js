@@ -1,5 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
-const { createUserClient } = require('../middleware/createClient');
 const fs = require('fs');
 require('dotenv').config();
 
@@ -7,21 +5,25 @@ async function indexGet(req, res) {
     const { data: folders, error: folderError } = await req.supabaseClient.from('Folder').select();
     const folderid = req.params.folderid;
     
-    if (folderid) {
-        var { data: files, error: fileError } = await req.supabaseClient
-                                                    .from('File')
-                                                    .select()
-                                                    .eq('folderid', folderid);
-    } else {
-        var { data: files, error: fileError } = await req.supabaseClient
-                                                    .from('File')
-                                                    .select()
-                                                    .is('folderid', null);
-    }
-    
-    if (folderError || fileError) {
-        console.error("folderGet error: ", folderError);
-        console.error("fileGet error: ", fileError);
+    // Get user's own files using destructuring
+    const { data: files, error: fileError } = folderid 
+        ? await req.supabaseClient
+            .from('File')
+            .select()
+            .eq('folderid', folderid)
+        : await req.supabaseClient
+            .from('File')
+            .select()
+            .is('folderid', null);
+
+    // Get shared files (files shared with current user)
+    const { data: sharedFiles, error: sharedFileError } = await req.supabaseClient
+        .from('File')
+        .select()
+        .contains('shared_with', [req.user.id]);
+
+    if (folderError || fileError || sharedFileError) {
+        console.error("Database errors:", { folderError, fileError, sharedFileError });
         return res.status(500).send("Server error");
     }
 
@@ -34,7 +36,7 @@ async function indexGet(req, res) {
             const folder = allFolders.find(f => f.id === currentId);
             if (!folder) break;
             
-            path.unshift({ // Add to beginning of array
+            path.unshift({
                 id: folder.id,
                 name: folder.name
             });
@@ -67,13 +69,14 @@ async function indexGet(req, res) {
         parentFolders = buildParentPath(folderid, folders);
     } else {
         nestedFolders = rootFolders;
-        parentFolders = []; // Empty at root level
+        parentFolders = [];
     }
    
     res.render('indexView', { 
         headerTitle: "MyDrive", 
         rootFolders: rootFolders, 
         files: files, 
+        sharedFiles: sharedFiles,
         nestedFolders: nestedFolders, 
         user: req.user, 
         parentFolders: parentFolders

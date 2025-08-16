@@ -171,5 +171,78 @@ async function fileDownload(req, res) {
     }
 }
 
+async function shareFile(req, res) {
+    try {
+        const { itemId, email, itemType } = req.body;
+        
+        // Validate input
+        if (!itemId || !email || itemType !== 'file') {
+            return res.status(400).json({ error: 'Missing required fields or invalid item type' });
+        }
+        
+        // Find user by email to get their UUID
+        const { data: userData, error: userError } = await req.supabaseClient
+            .from('User')
+            .select('id')
+            .eq('email', email)
+            .single();
+            
+        if (userError || !userData) {
+            console.error("Error finding user by email:", userError);
+            return res.status(404).json({ error: 'User not found with this email address' });
+        }
+        
+        const sharedToUserId = userData.id;
+        
+        // Get current file info including existing shared_with array
+        const { data: fileInfo, error: fetchError } = await req.supabaseClient
+            .from('File')
+            .select('shared_with, userid')
+            .eq('storagePath', itemId) // Using storagePath as ID
+            .single();
+            
+        if (fetchError || !fileInfo) {
+            console.error("Error fetching file info:", fetchError);
+            return res.status(404).json({ error: 'File not found' });
+        }
+        
+        // Check if user owns the file
+        if (fileInfo.userid !== req.user.id) {
+            return res.status(403).json({ error: 'You do not have permission to share this file' });
+        }
+        
+        // Get current shared_with array or initialize as empty array
+        let currentSharedWith = fileInfo.shared_with || [];
+        
+        // Check if user is already in the shared_with array
+        if (currentSharedWith.includes(sharedToUserId)) {
+            return res.status(400).json({ error: 'File is already shared with this user' });
+        }
+        
+        // Add the new user ID to the shared_with array
+        const updatedSharedWith = [...currentSharedWith, sharedToUserId];
+        
+        // Update the file with the new shared_with array
+        const { error: updateError } = await req.supabaseClient
+            .from('File')
+            .update({ shared_with: updatedSharedWith })
+            .eq('storagePath', itemId);
+            
+        if (updateError) {
+            console.error("Error updating file shared_with:", updateError);
+            return res.status(500).json({ error: 'Failed to share file' });
+        }
+        
+        res.status(200).json({ 
+            message: 'File shared successfully',
+            sharedWith: email,
+            totalSharedUsers: updatedSharedWith.length
+        });
+        
+    } catch(error) {
+        console.error("Share file error:", error);
+        res.status(500).json({ error: 'Error sharing file' });
+    }
+}
 
-module.exports = { fileGet, filePost, fileDownload, fileDelete };
+module.exports = { fileGet, filePost, fileDownload, fileDelete, shareFile };

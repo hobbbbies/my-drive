@@ -53,6 +53,28 @@
                     </div>
                 <% } %>
         </div>
+
+        <!-- Shared Files Section -->
+        <% if (locals.sharedFiles && sharedFiles.length > 0) { %>
+            <div class="shared-files-section">
+                <h3>Shared with me</h3>
+                <div class="files-grid">
+                    <% sharedFiles.forEach((file) => { %>
+                        <div class="file-item shared-file" 
+                             data-filename="<%= file.name %>"
+                             data-id="<%= file.id %>"
+                             data-size="<%= file.size %>"
+                             data-ext="<%= file.extension %>"
+                             data-added="<%= file.createdAt %>"
+                             data-storagePath="<%= file.storagePath %>">
+                            <div class="file-icon">📄</div>
+                            <div class="file-name"><%= file.name %></div>
+                            <span class="shared-indicator">👥</span>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% } %>
     </main>
 
     <!-- File Details Modal -->

@@ -42,7 +42,7 @@ async function sendShare() {
         return;
     }
 
-    if (!type) {
+    if (!currentShareItem.type) {
         console.error("No type specified for sharing");
         return;
     }
@@ -52,7 +52,7 @@ async function sendShare() {
     sendBtn.textContent = 'Sending...';
 
     try {
-        const response = await fetch('/share', {
+        const response = await fetch('/upload/share', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

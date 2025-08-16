@@ -1,4 +1,4 @@
-const {createClient} = require('@supabase/supabase-js');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 // Service role client for admin operations
