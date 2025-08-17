@@ -26,6 +26,9 @@ fileItems.forEach((item) => {
         const fileAdded = item.getAttribute("data-added");
         const folderid = item.getAttribute("data-folderid");
         
+        // Check if this is a shared file
+        const isSharedFile = item.classList.contains('shared-file');
+        
         // Store file info for sharing (use storagePath as unique identifier)
         currentFileForSharing = { path: storagePath, name: fileName };
         
@@ -36,9 +39,9 @@ fileItems.forEach((item) => {
         modalExt.textContent = fileExt || "--";
         modalAdded.textContent = trimmedAdded || "--";
 
-        console.log("Storage Path:", storagePath);
+        // Set download link
         downloadLink.setAttribute("href", `/download/?storagePath=${encodeURIComponent(storagePath)}`);
-        deleteLink.setAttribute("href", `/delete/?storagePath=${encodeURIComponent(storagePath)}`);
+        deleteLink.setAttribute("href", `/delete/?storagePath=${encodeURIComponent(storagePath)}&shared=${!!isSharedFile}`);
 
         // Show the modal
         modal.style.display = "block";
@@ -62,7 +65,7 @@ window.onclick = (event) => {
  * Opens share modal and closes the file details modal
  * @param {string} type - The type of item being shared ('file' or 'folder')
  */
-function shareFromModal(type) {
+function shareFromModal() {
     if (currentFileForSharing.path && currentFileForSharing.name) {
         // Close file details modal
         modal.style.display = "none";

@@ -51,8 +51,15 @@ async function sendShare() {
     sendBtn.disabled = true;
     sendBtn.textContent = 'Sending...';
 
+    console.log('=== SHARE REQUEST DEBUG ===');
+    console.log('Current Share Item:', currentShareItem);
+    console.log('Email:', email);
+    console.log('Permissions:', permissions);
+    console.log('Request URL:', `/${currentShareItem.type}/share`);
+    console.log('==========================');
+
     try {
-        const response = await fetch('/upload/share', {
+        const response = await fetch(`/${currentShareItem.type}/share`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

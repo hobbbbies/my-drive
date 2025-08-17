@@ -9,7 +9,6 @@ const fileRouter = require("./routes/fileRouter");
 const authRouter = require("./routes/authRouter");
 const folderRouter = require("./routes/folderRouter");
 
-const { log } = require("console");
 const {createClient} = require('@supabase/supabase-js');
 require('dotenv').config();
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY); 
@@ -24,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const pgPool = new Pool({
-  connectionString: process.env.SUPABASE_DATABASE_URL, // Your Supabase PostgreSQL URL
+  connectionString: process.env.SUPABASE_DATABASE_URL, 
   ssl: {
     rejectUnauthorized: false // Supabase requires this
   }
@@ -43,10 +42,10 @@ app.use(session({
 }));
 
 app.use("/", indexRouter);
-app.use("/upload", fileRouter);
+app.use("/file", fileRouter);
 app.use("/auth", authRouter);
 app.use("/folder", folderRouter);
 
 app.listen(PORT, () => {
     console.log("Listening on 3000");
-})
+});

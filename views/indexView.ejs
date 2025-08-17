@@ -46,6 +46,22 @@
                             </div>
                         <% }); %>
                     <% } %>
+                    <% if (locals.sharedFiles) { %>
+                        <% sharedFiles.forEach((sharedFile) => { %>
+                            <div class="file-item shared-file" 
+                            data-filename="<%= sharedFile.name %>"
+                            data-size="<%= sharedFile.size %> b"
+                            data-ext="<%= sharedFile.extension %>"
+                            data-added="<%= sharedFile.createdAt %>"
+                            data-folderid="<%= sharedFile.folderid %>"
+                            data-storagePath="<%= sharedFile.storagePath %>"
+                            >
+                                <div class="file-icon">📄</div>
+                                <div class="file-name"><%= sharedFile.name %></div>
+                                <span class="shared-indicator">Shared by <%= sharedFile.User.email %></span>
+                            </div>
+                        <% }); %>
+                    <% } %>
                 </div>
                 <% if ((!files || !files.length) && (!nestedFolders || !nestedFolders.length)) { %>
                     <div class="empty-state">
@@ -53,28 +69,6 @@
                     </div>
                 <% } %>
         </div>
-
-        <!-- Shared Files Section -->
-        <% if (locals.sharedFiles && sharedFiles.length > 0) { %>
-            <div class="shared-files-section">
-                <h3>Shared with me</h3>
-                <div class="files-grid">
-                    <% sharedFiles.forEach((file) => { %>
-                        <div class="file-item shared-file" 
-                             data-filename="<%= file.name %>"
-                             data-id="<%= file.id %>"
-                             data-size="<%= file.size %>"
-                             data-ext="<%= file.extension %>"
-                             data-added="<%= file.createdAt %>"
-                             data-storagePath="<%= file.storagePath %>">
-                            <div class="file-icon">📄</div>
-                            <div class="file-name"><%= file.name %></div>
-                            <span class="shared-indicator">👥</span>
-                        </div>
-                    <% }); %>
-                </div>
-            </div>
-        <% } %>
     </main>
 
     <!-- File Details Modal -->
@@ -102,7 +96,7 @@
             </div>
             <div class="modal-footer">
                 <a id="download-link" class="modal-button primary" href="#">Download</a>
-                <button id="share-link" class="modal-button secondary" onclick="shareFromModal('file')">Share</button>
+                <button id="share-link" class="modal-button secondary" onclick="shareFromModal()">Share</button>
                 <a id="delete-link" class="modal-button danger" href="#">Delete</a>
             </div>
         </div>
@@ -110,7 +104,7 @@
 
     <!-- Include Share Modal -->
     <%- include('partials/shareModal') %>
-
+    
     <!-- Include JavaScript files -->
     <script src="/js/shareModal.js"></script>
     <script src="/js/index.js"></script>

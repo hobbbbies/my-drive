@@ -827,3 +827,28 @@ body {
 .folder-item, .file-item {
     position: relative;
 }
+
+.shared-indicator {
+    font-size: 10px;
+    color: #9aa0a6;
+    margin-top: 4px;
+    display: block;
+    opacity: 0.7;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+/* Make shared files slightly different but subtle */
+.file-item.shared-file {
+    border-left: 2px solid #e8f0fe;
+}
+
+/* Optional: Only show the shared indicator on hover for even less prominence */
+.shared-indicator {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.file-item.shared-file:hover .shared-indicator {
+    opacity: 0.7;
+}

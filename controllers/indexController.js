@@ -5,22 +5,30 @@ async function indexGet(req, res) {
     const { data: folders, error: folderError } = await req.supabaseClient.from('Folder').select();
     const folderid = req.params.folderid;
     
-    // Get user's own files using destructuring
+    // Get user's own files using destructuring - ONLY files owned by current user
     const { data: files, error: fileError } = folderid 
         ? await req.supabaseClient
             .from('File')
             .select()
             .eq('folderid', folderid)
+            .eq('userid', req.user.id)
         : await req.supabaseClient
             .from('File')
             .select()
-            .is('folderid', null);
+            .is('folderid', null)
+            .eq('userid', req.user.id);
 
     // Get shared files (files shared with current user)
     const { data: sharedFiles, error: sharedFileError } = await req.supabaseClient
         .from('File')
-        .select()
-        .contains('shared_with', [req.user.id]);
+        .select(`
+            *,
+            User:userid (
+                email,
+                name
+            )
+        `)
+        .overlaps('shared_with', [req.user.id]);
 
     if (folderError || fileError || sharedFileError) {
         console.error("Database errors:", { folderError, fileError, sharedFileError });
