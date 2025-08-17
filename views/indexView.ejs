@@ -17,6 +17,7 @@
         <div class="files-container">
             <!-- Future implentation: path will be rendered here -->
                 <div class="files-grid">
+                    <!-- Regular folders (user's own) -->
                     <%if (locals.nestedFolders){ %>
                         <% nestedFolders.forEach((folder) => { %>
                             <div class="folder-item" onclick="window.location.href='/root/<%= folder.id %>'">
@@ -31,6 +32,20 @@
                             </div>
                         <% })%>
                     <% }%>
+
+                    <!-- Shared folders (folders shared with current user) -->
+                    <% if (locals.sharedFolders) { %>
+                        <% sharedFolders.forEach((sharedFolder) => { %>
+                            <div class="folder-item shared-folder" onclick="window.location.href='/root/<%= sharedFolder.id %>'">
+                                <div class="file-icon">📂</div>
+                                <div class="file-name"><%= sharedFolder.name %></div>
+                                <span class="shared-indicator">Shared by <%= sharedFolder.User.email %></span>
+                                <!-- Note: No delete/share buttons for shared folders since user doesn't own them -->
+                            </div>
+                        <% }); %>
+                    <% } %>
+
+                    <!-- Regular files (user's own) -->
                     <% if (locals.files) { %>
                         <% files.forEach((file) => { %>
                             <div class="file-item" 
@@ -46,6 +61,8 @@
                             </div>
                         <% }); %>
                     <% } %>
+
+                    <!-- Shared files (files shared with current user) -->
                     <% if (locals.sharedFiles) { %>
                         <% sharedFiles.forEach((sharedFile) => { %>
                             <div class="file-item shared-file" 

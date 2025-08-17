@@ -10,6 +10,6 @@ router.get("/create", userAuth, attachClient, controller.folderCreateGet);
 
 router.get("/delete", userAuth, attachClient, controller.folderDelete);
 
-router.get("/share", userAuth, attachClient, controller.shareFolder);
+router.post("/share", userAuth, attachClient, controller.shareFolder);
 
 module.exports = router;

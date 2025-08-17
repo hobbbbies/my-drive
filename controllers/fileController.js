@@ -226,8 +226,8 @@ async function shareFile(req, res) {
     // Check if user is already in the shared_with array
     if (currentSharedWith.includes(sharedToUserId)) {
       return res
-        .status(400)
-        .json({ error: "File is already shared with this user" });
+        .status(200)
+        .json({ message: "File is already shared with this user" });
     }
 
     // Add the new user ID to the shared_with array
