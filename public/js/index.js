@@ -74,9 +74,9 @@ function shareFromModal() {
 }
 
 // Delete folder function
-function deleteFolder(folderId) {
+function deleteFolder(folderId, shared=false) {
     if (confirm('Are you sure you want to delete this folder? This action cannot be undone.')) {
-        window.location.href = `/folder/delete/?id=${folderId}`;
+        window.location.href = `/folder/delete/?id=${folderId}&shared=${shared}`;
     }
 }
 

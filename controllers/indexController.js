@@ -18,52 +18,51 @@ async function indexGet(req, res) {
             .is('folderid', null)
             .eq('userid', req.user.id);
 
-    // Get shared files (files shared with current user)
-    const { data: sharedFiles, error: sharedFileError } = await req.supabaseClient
-        .from('File')
-        .select(`
-            *,
-            User:userid (
-                email,
-                name
-            )
-        `)
-        .overlaps('shared_with', [req.user.id]);
+    // Get shared files (files shared with current user) - FILTERED BY FOLDER
+    const { data: sharedFiles, error: sharedFileError } = folderid
+        ? await req.supabaseClient
+            .from('File')
+            .select(`
+                *,
+                User:userid (
+                    email,
+                    name
+                )
+            `)
+            .eq('folderid', folderid)
+            .overlaps('shared_with', [req.user.id])
+        : await req.supabaseClient
+            .from('File')
+            .select(`
+                *,
+                User:userid (
+                    email,
+                    name
+                )
+            `)
+            .is('folderid', null)
+            .overlaps('shared_with', [req.user.id]);
 
-    // Get shared folders (folders shared with current user)
-    const { data: sharedFolders, error: sharedFolderError } = await req.supabaseClient
+    // Get ALL shared folders (for path building) - NOT filtered by parent
+    const { data: allSharedFolders, error: allSharedError } = await req.supabaseClient
         .from('Folder')
         .select(`
             *,
             User:userid (
                 email,
-                name
-            )
-        `)
+                name    
+                )
+            `)
         .overlaps('shared_with', [req.user.id]);
 
-    if (folderError || fileError || sharedFileError || sharedFolderError) {
-        console.error("Database errors:", { folderError, fileError, sharedFileError, sharedFolderError });
-        return res.status(500).send("Server error");
-    }
+    // Get shared folders at current level (for display) - FILTERED BY PARENT
+    const currentSharedFolders = folderid
+        ? allSharedFolders?.filter(folder => folder.parentid === folderid) || []
+        : allSharedFolders?.filter(folder => folder.parentid === null) || [];
 
-    // Function to build parent folder path
-    function buildParentPath(currentFolderId, allFolders) {
-        const path = [];
-        let currentId = currentFolderId;
-        
-        while (currentId) {
-            const folder = allFolders.find(f => f.id === currentId);
-            if (!folder) break;
-            
-            path.unshift({
-                id: folder.id,
-                name: folder.name
-            });
-            currentId = folder.parentid;
-        }
-        
-        return path;
+    if (folderError || fileError || sharedFileError || allSharedError) {
+        console.error("Database errors:", { folderError, fileError, sharedFileError, allSharedError });
+        return res.status(500).send("Server error");
     }
 
     let nestedFolders;
@@ -73,6 +72,9 @@ async function indexGet(req, res) {
     // Filter folders to only show user's own folders
     const userFolders = folders.filter(folder => folder.userid === req.user.id);
     const rootFolders = userFolders.filter((folder) => folder.parentid === null);
+    
+    // Get ALL folders accessible to user (owned + shared) for path building
+    const allAccessibleFolders = [...userFolders, ...(allSharedFolders || [])];
     
     if (folderid) {
         const { data: folderData, error: folderFetchError } = await req.supabaseClient
@@ -89,7 +91,8 @@ async function indexGet(req, res) {
         chosenFolder = folderData;
         nestedFolders = userFolders.filter((folder) => folder.parentid === folderid);
         
-        parentFolders = buildParentPath(folderid, userFolders);
+        // Use allAccessibleFolders for path building (includes all shared folders)
+        parentFolders = buildParentPath(folderid, allAccessibleFolders);
     } else {
         nestedFolders = rootFolders;
         parentFolders = [];
@@ -101,10 +104,29 @@ async function indexGet(req, res) {
         files: files, 
         sharedFiles: sharedFiles,
         nestedFolders: nestedFolders, 
-        sharedFolders: sharedFolders, // Add shared folders
+        currentSharedFolders: currentSharedFolders,
         user: req.user, 
         parentFolders: parentFolders
     });
+}
+
+// Function to build parent folder path - now works with both owned and shared folders
+function buildParentPath(currentFolderId, allFolders) {
+    const path = [];
+    let currentId = currentFolderId;
+    
+    while (currentId) {
+        const folder = allFolders.find(f => f.id === currentId);
+        if (!folder) break;
+        
+        path.unshift({
+            id: folder.id,
+            name: folder.name
+        });
+        currentId = folder.parentid;
+    }
+    
+    return path;
 }
 
 module.exports = { indexGet };

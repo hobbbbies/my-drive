@@ -14,77 +14,93 @@
             <%- include('partials/header', { user: user }) %>
         </div>
         
-        <div class="files-container">
-            <!-- Future implentation: path will be rendered here -->
-                <div class="files-grid">
-                    <!-- Regular folders (user's own) -->
-                    <%if (locals.nestedFolders){ %>
-                        <% nestedFolders.forEach((folder) => { %>
-                            <div class="folder-item" onclick="window.location.href='/root/<%= folder.id %>'">
-                                <div class="file-icon">📂</div>
-                                <div class="file-name"><%= folder.name %></div>
-                                <button class="delete-folder" onclick="event.stopPropagation(); deleteFolder('<%= folder.id %>')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <button class="share-folder" onclick="event.stopPropagation(); openShareModal('<%= folder.id %>', '<%= folder.name %>', 'folder')">
-                                    <i class="fas fa-share-alt"></i>
-                                </button>
-                            </div>
-                        <% })%>
-                    <% }%>
-
-                    <!-- Shared folders (folders shared with current user) -->
-                    <% if (locals.sharedFolders) { %>
-                        <% sharedFolders.forEach((sharedFolder) => { %>
-                            <div class="folder-item shared-folder" onclick="window.location.href='/root/<%= sharedFolder.id %>'">
-                                <div class="file-icon">📂</div>
-                                <div class="file-name"><%= sharedFolder.name %></div>
-                                <span class="shared-indicator">Shared by <%= sharedFolder.User.email %></span>
-                                <!-- Note: No delete/share buttons for shared folders since user doesn't own them -->
-                            </div>
-                        <% }); %>
-                    <% } %>
-
-                    <!-- Regular files (user's own) -->
-                    <% if (locals.files) { %>
-                        <% files.forEach((file) => { %>
-                            <div class="file-item" 
-                            data-filename="<%= file.name %>"
-                            data-size="<%= file.size %> b"
-                            data-ext="<%= file.extension %>"
-                            data-added="<%= file.createdAt %>"
-                            data-folderid="<%= file.folderid %>"
-                            data-storagePath="<%= file.storagePath %>"
-                            >
-                                <div class="file-icon">📄</div>
-                                <div class="file-name"><%= file.name %></div>
-                            </div>
-                        <% }); %>
-                    <% } %>
-
-                    <!-- Shared files (files shared with current user) -->
-                    <% if (locals.sharedFiles) { %>
-                        <% sharedFiles.forEach((sharedFile) => { %>
-                            <div class="file-item shared-file" 
-                            data-filename="<%= sharedFile.name %>"
-                            data-size="<%= sharedFile.size %> b"
-                            data-ext="<%= sharedFile.extension %>"
-                            data-added="<%= sharedFile.createdAt %>"
-                            data-folderid="<%= sharedFile.folderid %>"
-                            data-storagePath="<%= sharedFile.storagePath %>"
-                            >
-                                <div class="file-icon">📄</div>
-                                <div class="file-name"><%= sharedFile.name %></div>
-                                <span class="shared-indicator">Shared by <%= sharedFile.User.email %></span>
-                            </div>
-                        <% }); %>
-                    <% } %>
+        <!-- <div class="files-container">
+            <!-- Check if current folder is shared -->
+            <% console.log(locals.chosenFolder ) %>
+            <% if (locals.chosenFolder && locals.chosenFolder.userid !== user.id) { %>
+                <div class="shared-folder-notice">
+                    <i class="fas fa-info-circle"></i>
+                    <span>This is a shared folder - Only the owner can change its contents.</span>
                 </div>
-                <% if ((!files || !files.length) && (!nestedFolders || !nestedFolders.length)) { %>
-                    <div class="empty-state">
-                        <p>No files yet. Start by uploading a file!</p>
-                    </div>
+            <% } %> --> 
+            <!-- This doesnt work because indexView does not know what folder it is in!!!!!! -->
+            
+            <!-- Future implementation: path will be rendered here -->
+            <div class="files-grid">
+                <!-- Regular folders (user's own) -->
+                <%if (locals.nestedFolders){ %>
+                    <% nestedFolders.forEach((folder) => { %>
+                        <div class="folder-item" onclick="window.location.href='/root/<%= folder.id %>'">
+                            <div class="file-icon">📂</div>
+                            <div class="file-name"><%= folder.name %></div>
+                            <button class="delete-folder" onclick="event.stopPropagation(); deleteFolder('<%= folder.id %>')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="share-folder" onclick="event.stopPropagation(); openShareModal('<%= folder.id %>', '<%= folder.name %>', 'folder')">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    <% })%>
+                <% }%>
+
+                <!-- Shared folders (folders shared with current user) -->
+                <% if (locals.currentSharedFolders) { %>
+                    <% currentSharedFolders.forEach((sharedFolder) => { %>
+                        <div class="folder-item shared-folder" onclick="window.location.href='/root/<%= sharedFolder.id %>'">
+                            <div class="file-icon">📂</div>
+                            <div class="file-name"><%= sharedFolder.name %></div>
+                            <button class="delete-folder" onclick="event.stopPropagation(); deleteFolder('<%= sharedFolder.id %>', true)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="share-folder" onclick="event.stopPropagation(); openShareModal('<%= sharedFolder.id %>', '<%= sharedFolder.name %>', 'folder')">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <span class="shared-indicator">Shared by <%= sharedFolder.User.email %></span>
+                        </div>
+                    <% }); %>
                 <% } %>
+
+                <!-- Regular files (user's own) -->
+                <% if (locals.files) { %>
+                    <% files.forEach((file) => { %>
+                        <div class="file-item" 
+                        data-filename="<%= file.name %>"
+                        data-size="<%= file.size %> b"
+                        data-ext="<%= file.extension %>"
+                        data-added="<%= file.createdAt %>"
+                        data-folderid="<%= file.folderid %>"
+                        data-storagePath="<%= file.storagePath %>"
+                        >
+                            <div class="file-icon">📄</div>
+                            <div class="file-name"><%= file.name %></div>
+                        </div>
+                    <% }); %>
+                <% } %>
+
+                <!-- Shared files (files shared with current user) -->
+                <% if (locals.sharedFiles) { %>
+                    <% sharedFiles.forEach((sharedFile) => { %>
+                        <div class="file-item shared-file" 
+                        data-filename="<%= sharedFile.name %>"
+                        data-size="<%= sharedFile.size %> b"
+                        data-ext="<%= sharedFile.extension %>"
+                        data-added="<%= sharedFile.createdAt %>"
+                        data-folderid="<%= sharedFile.folderid %>"
+                        data-storagePath="<%= sharedFile.storagePath %>"
+                        >
+                            <div class="file-icon">📄</div>
+                            <div class="file-name"><%= sharedFile.name %></div>
+                            <span class="shared-indicator">Shared by <%= sharedFile.User.email %></span>
+                            
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+            <% if ((!files || !files.length) && (!nestedFolders || !nestedFolders.length) ) { %>
+                <div class="empty-state">
+                    <p>No files yet. Start by uploading a file!</p>
+                </div>
+            <% } %>
         </div>
     </main>
 

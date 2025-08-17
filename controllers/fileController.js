@@ -63,8 +63,7 @@ async function filePost(req, res) {
       return res.status(400).send("Error saving file information");
     }
 
-    const referrer = req.get('Referer') || '/';
-    res.redirect(referrer);
+    res.redirect("/");
   } catch (error) {
     console.error(error);
     return res.status(500).send("Something went wrong with file upload");
@@ -73,7 +72,15 @@ async function filePost(req, res) {
 
 async function fileGet(req, res) {
   try {
-    const { data, error } = await req.supabaseClient.from("Folder").select();
+    const { data, error } = await req.supabaseClient
+          .from("Folder")
+          .select()
+          .eq('userid', req.user.id);
+
+    if (error) {
+      console.error("Error getting folders: ", error.message);
+      return res.status(500).send("Error getting folders");
+    }
 
     res.render("uploadView", { folders: data, user: req.user });
   } catch (error) {

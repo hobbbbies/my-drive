@@ -34,7 +34,8 @@ async function folderPost (req, res) {
         //     return res.status(500).send("Error uploading folder into storage");
         // }
 
-        res.redirect("/");
+        const referrer = req.get('Referer') || '/';
+        res.redirect(referrer);
   } catch (error) {
         console.error("Server error: ", error);
         res.status(500).json({ error: error.message });
@@ -45,7 +46,9 @@ async function folderCreateGet(req, res) {
     try {
         const { data: folders, error} = await req.supabaseClient
                             .from('Folder')
-                            .select();
+                            .select()
+                            .eq('userid', req.user.id);
+                            
         if (error) {
             console.log("Error getting folders: ", error);
             res.status(500).json({ error: error.message });
@@ -57,47 +60,74 @@ async function folderCreateGet(req, res) {
 }
 
 async function folderDelete(req, res) {
-    try{        
-        const { data: nestedFolders, error: selectError } = await req.supabaseClient
-                                                                        .from('Folder')
-                                                                        .select()
-                                                                        .eq('parentid', req.query.id);
-        if (selectError) {
-            console.error("Error selecting nested folders:", selectError);
-            return res.status(500).send("Error finding nested folders");
-        }
+    try {
+        const isShared = req.query.shared === 'true';
+        
+        if (!isShared) {
+            // Regular folder deletion - delete the entire folder and contents
+            const { data: nestedFolders, error: selectError } = await req.supabaseClient
+                .from('Folder')
+                .select()
+                .eq('parentid', req.query.id);
+                
+            if (selectError) {
+                console.error("Error selecting nested folders:", selectError);
+                return res.status(500).send("Error finding nested folders");
+            }
 
-        const { data: files, error: fileError } = await req.supabaseClient
-                                                                .from('File')
-                                                                .select()
-                                                                .eq('folderid', req.query.id);
-        if (fileError) {
-            console.error("Error selecting nested files:", fileError);
-            return res.status(500).send("Error finding nested files");
-        }
+            const { data: files, error: fileError } = await req.supabaseClient
+                .from('File')
+                .select()
+                .eq('folderid', req.query.id);
+                
+            if (fileError) {
+                console.error("Error selecting nested files:", fileError);
+                return res.status(500).send("Error finding nested files");
+            }
 
-        const { data: parentFolder, error: parentError } = await req.supabaseClient 
-                                                                        .from('Folder')
-                                                                        .select('name')
-                                                                        .eq('id', req.query.id)
-                                                                        .single()
-        if (parentError) {
-            console.error("Error selecting parent folder:", fileError);
-            return res.status(500).send("Error selecting parent folder");
-        }
-        try {
-            await deleteAllFiles(req, files, parentFolder.name);
-            await folderDeleteRecursively(req, nestedFolders);
-        } catch(error) {
-            console.error(error);
-            return res.status(500).send("Error in helper functions");
-        }
+            const { data: parentFolder, error: parentError } = await req.supabaseClient 
+                .from('Folder')
+                .select('name')
+                .eq('id', req.query.id)
+                .single();
+                
+            if (parentError) {
+                console.error("Error selecting parent folder:", parentError);
+                return res.status(500).send("Error selecting parent folder");
+            }
+            
+            try {
+                await deleteAllFiles(req, files, parentFolder.name);
+                await folderDeleteRecursively(req, nestedFolders);
+            } catch(error) {
+                console.error(error);
+                return res.status(500).send("Error in helper functions");
+            }
 
-        const { error: folderError } = await req.supabaseClient.from('Folder').delete().eq('id', req.query.id);
-        if (folderError) {
-            console.error("Error deleting folder: ", folderError.message);
-            return res.status(500).send("Error deleting folder on the DB side.");
+            // Delete the main folder from database
+            const { error: folderError } = await req.supabaseClient
+                .from('Folder')
+                .delete()
+                .eq('id', req.query.id);
+                
+            if (folderError) {
+                console.error("Error deleting folder: ", folderError.message);
+                return res.status(500).send("Error deleting folder on the DB side.");
+            }
+        } else {
+            // Shared folder deletion - remove user from shared_with array using RPC
+            const { error: updateError } = await req.supabaseClient
+                .rpc("remove_user_from_shared_folder", { // You'll need to create this stored procedure
+                    folder_id: req.query.id,
+                    user_id: req.user.id
+                });
+
+            if (updateError) {
+                console.error("Error updating folder shared_with: ", updateError.message);
+                return res.status(400).send("Error removing folder from shared list");
+            }
         }
+        
         const referrer = req.get('Referer') || '/';
         res.redirect(referrer);
     } catch(error) {
