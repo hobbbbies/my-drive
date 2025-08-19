@@ -61,10 +61,10 @@ async function folderCreateGet(req, res) {
 
 async function folderDelete(req, res) {
     try {
-        const isShared = req.query.shared === 'true';
+        const shared = req.query.shared === 'true';
         
-        if (!isShared) {
-            // Get the parent folder info
+        if (!shared) {
+            // Deleting own folder - remove folder completely
             const { data: parentFolder, error: parentError } = await req.supabaseClient 
                 .from('Folder')
                 .select('id, name')
@@ -75,6 +75,17 @@ async function folderDelete(req, res) {
                 console.error("Error selecting parent folder:", parentError);
                 return res.status(500).send("Error selecting parent folder");
             }
+
+            // Delete all SharedFolders records that reference this folder first
+            const { error: sharedDeleteError } = await req.supabaseClient
+                .from("SharedFolders")
+                .delete()
+                .eq("folderid", req.query.id);
+
+            if (sharedDeleteError) {
+                console.error("Error deleting shared folder records: ", sharedDeleteError.message);
+                return res.status(400).send("Error removing folder shares");
+            }
             
             try {
                 // Pass parentFolder as array to match the recursive function pattern
@@ -84,15 +95,15 @@ async function folderDelete(req, res) {
                 return res.status(500).send("Error in helper functions");
             }
         } else {
-            // Shared folder deletion - remove user from shared_with array using RPC
-            const { error: updateError } = await req.supabaseClient
-                .rpc("remove_user_from_shared_folder", {
-                    folder_id: req.query.id,
-                    user_id: req.user.id
-                });
+            // Removing shared folder - only remove the share record for this user
+            const { error: removeShareError } = await req.supabaseClient
+                .from("SharedFolders")
+                .delete()
+                .eq("folderid", req.query.id)
+                .eq("shared_with", req.user.id);
 
-            if (updateError) {
-                console.error("Error updating folder shared_with: ", updateError.message);
+            if (removeShareError) {
+                console.error("Error removing shared folder: ", removeShareError.message);
                 return res.status(400).send("Error removing folder from shared list");
             }
         }
@@ -174,7 +185,7 @@ async function deleteAllFiles(req, files, folderName) {
     }
 }
 
-async function shareFolder(req, res) {
+async function shareFolderController(req, res) {
     try {
         const { itemId: folderid, email, permissions } = req.body;
 
@@ -234,37 +245,8 @@ async function shareFoldersRecursively(req, folders, recipientId) {
     if (!folders || !folders.length) return;
     
     for (const folder of folders) {
-        // Could move this out of the loop and do only one query - might be more efficient
-        const { data: folderInfo, error: folderFetchError } = await req.supabaseClient
-            .from("Folder")
-            .select("shared_with, userid")
-            .eq("id", folder.id)
-            .single();
-
-        if (folderFetchError || !folderInfo) {
-            console.error("Error fetching folder info:", folderFetchError);
-            throw new Error(`Folder not found: ${folder.id}`);
-        }
-
-        // Get current shared_with array for folder or initialize as empty array
-        let currentFolderSharedWith = folderInfo.shared_with || [];
-
-        // Check if user is already in the folder's shared_with array
-        if (!currentFolderSharedWith.includes(recipientId)) {
-            // Add the new user ID to the folder's shared_with array
-            const updatedFolderSharedWith = [...currentFolderSharedWith, recipientId];
-
-            // Update the folder with the new shared_with array
-            const { error: folderUpdateError } = await req.supabaseClient
-                .from("Folder")
-                .update({ shared_with: updatedFolderSharedWith })
-                .eq("id", folder.id);
-
-            if (folderUpdateError) {
-                console.error("Error updating folder shared_with:", folderUpdateError);
-                throw new Error(`Failed to share folder: ${folder.id}`);
-            }
-        }
+        // Share the current folder using the helper function
+        await shareFolder(req.supabaseClient, folder, recipientId, req.user.id);
 
         // Get nested folders for recursion
         const { data: nestedFolders, error: selectError } = await req.supabaseClient
@@ -277,7 +259,7 @@ async function shareFoldersRecursively(req, folders, recipientId) {
         }              
         
         // Recursively call function on nested folders
-        await shareFoldersRecursively(req, nestedFolders, email);
+        await shareFoldersRecursively(req, nestedFolders, recipientId);
 
         // Selects all files inside current folder for sharing
         const { data: files, error: fileError } = await req.supabaseClient
@@ -291,57 +273,98 @@ async function shareFoldersRecursively(req, folders, recipientId) {
         
         // Shares all selected files
         try {
-            await shareAllFiles(req, files, email);
+            await shareAllFiles(req, files, recipientId);
         } catch(error) {
             throw error;
         }
     }
 }
 
+async function shareFolder(supabaseClient, folder, recipientId, currentUserId) {
+    try {
+        // Validate input
+        if (!folder.id || !recipientId) {
+            throw new Error("Missing required fields: folder.id and recipientId are required");
+        }
 
-async function shareAllFiles(req, files, email) {
-    // Find user by email to get their UUID
-    const { data: userData, error: userError } = await req.supabaseClient
-        .from("User")
-        .select("id")
-        .eq("email", email)
-        .single();
+        // Check if folder is already shared with this user
+        const { data: existingShare, error: checkError } = await supabaseClient
+            .from('SharedFolders')
+            .select('id')
+            .eq('folderid', folder.id)
+            .eq('shared_with', recipientId)
+            .single();
 
-    if (userError || !userData) {
-        console.error("Error finding user by email:", userError);
-        throw new Error("User not found with this email address");
+        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found
+            console.error("Error checking existing share:", checkError);
+            throw new Error("Error checking existing shares");
+        }
+
+        if (existingShare) {
+            // This is NOT an error - just return success with info message
+            console.log(`Folder ${folder.id} already shared with user ${recipientId}`);
+            return { 
+                success: true, 
+                alreadyShared: true, 
+                message: "Folder is already shared with this user" 
+            };
+        }
+
+        const { error: shareError } = await supabaseClient
+            .from('SharedFolders')
+            .insert({
+                folderid: folder.id,
+                shared_by: currentUserId, // Use the passed currentUserId
+                shared_with: recipientId,
+                permissions: 'view', // Default permission
+                share_parents: false // Default value
+            });
+
+        if (shareError) {
+            console.error("Error sharing folder:", shareError);
+            throw new Error(shareError.message || "Error sharing folder");
+        }
+
+        console.log(`Successfully shared folder ${folder.id} with user ${recipientId}`);
+        return { 
+            success: true, 
+            message: "Folder shared successfully" 
+        };
+
+    } catch (error) {
+        console.error("Share folder helper error:", error);
+        return { 
+            success: false, 
+            error: error.message || "Error sharing folder" 
+        };
     }
+}
 
-    const sharedToUserId = userData.id;
-
+async function shareAllFiles(req, files, recipientId) {
+    // Remove the user lookup since we already have the UUID
     for (const file of files) {
         try {
             const result = await shareFile(
                 req.supabaseClient,
                 req.user.id,
                 file.storagePath,
-                sharedToUserId,
+                recipientId, // Use recipientId directly
                 'view',
                 true   
             );
 
             if (result.success) {
-                console.log(`Successfully shared file ${file.id} with ${email}`);
+                console.log(`Successfully shared file ${file.id} with user ${recipientId}`);
             } else if (result.alreadyShared) {
-                console.log(`File ${file.id} already shared with ${email}`);
+                console.log(`File ${file.id} already shared with user ${recipientId}`);
             } else {
                 console.error(`Error sharing file ${file.id}:`, result.error);
             }
 
         } catch (error) {
-            console.error(`Error sharing file ${file.id} with ${email}:`, error.message);
-            // Continue with next file instead of throwing
+            console.error(`Error sharing file ${file.id} with user ${recipientId}:`, error.message);
         }
     }
 }
 
-async function shareFolder() {
-    
-}
-
-module.exports = { folderPost, folderCreateGet, folderDelete, shareFolder }
+module.exports = { folderPost, folderCreateGet, folderDelete, shareFolderController }
