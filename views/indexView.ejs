@@ -33,15 +33,15 @@
                 <% }%>
 
                 <!-- Shared folders (folders shared with current user) -->
-                <% if (locals.currentSharedFolders) { %>
-                    <% currentSharedFolders.forEach((sharedFolder) => { %>
-                        <div class="folder-item shared-folder" onclick="window.location.href='/root/<%= sharedFolder.id %>'">
+                <% if (locals.sharedFolders) { %>
+                    <% sharedFolders.forEach((sharedFolderRecord) => { %>
+                        <div class="folder-item shared-folder" onclick="window.location.href='/root/<%= sharedFolderRecord.Folder.id %>'">
                             <div class="file-icon">📂</div>
-                            <div class="file-name"><%= sharedFolder.name %></div>
-                            <button class="delete-folder" onclick="event.stopPropagation(); deleteFolder('<%= sharedFolder.id %>', true)">
+                            <div class="file-name"><%= sharedFolderRecord.Folder.name %></div>
+                            <button class="delete-folder" onclick="event.stopPropagation(); deleteFolder('<%= sharedFolderRecord.Folder.id %>', true)">
                                 <i class="fas fa-trash"></i>
                             </button>
-                            <span class="shared-indicator">Shared by <%= sharedFolder.User.email %></span>
+                            <span class="shared-indicator">Shared by <%= sharedFolderRecord.User.email %></span>
                         </div>
                     <% }); %>
                 <% } %>

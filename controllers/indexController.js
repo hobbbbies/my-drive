@@ -10,15 +10,15 @@ async function indexGet(req, res) {
     
     console.log('userid: ', req.user.id);
     console.log('folderid: ', folderid);
+    
     // Get shared files
     const { data: sharedFiles, error: sharedFileError } = await getSharedFiles(req.supabaseClient, req.user.id, folderid);
     
     // Get shared folders
-    const { data: allSharedFolders, error: allSharedError } = await getAllSharedFolders(req.supabaseClient, req.user.id);
-    const currentSharedFolders = filterSharedFoldersByParent(allSharedFolders, folderid);
+    const { data: sharedFolders, error: sharedFolderError } = await getSharedFolders(req.supabaseClient, req.user.id, folderid);
 
-    if (folderError || fileError || sharedFileError || allSharedError) {
-        console.error("Database errors:", { folderError, fileError, sharedFileError, allSharedError });
+    if (folderError || fileError || sharedFileError || sharedFolderError) {
+        console.error("Database errors:", { folderError, fileError, sharedFileError, sharedFolderError });
         return res.status(500).send("Server error");
     }
 
@@ -27,7 +27,7 @@ async function indexGet(req, res) {
     let parentFolders = [];
     
     const rootFolders = folders.filter((folder) => folder.parentid === null);
-    const allAccessibleFolders = [...folders, ...(allSharedFolders || [])];
+    const allAccessibleFolders = [...folders, ...(sharedFolders || [])];
     
     if (folderid) {
         const { data: folderData, error: folderFetchError } = await req.supabaseClient
@@ -55,7 +55,7 @@ async function indexGet(req, res) {
         files: files, 
         sharedFiles: sharedFiles,
         nestedFolders: nestedFolders, 
-        currentSharedFolders: currentSharedFolders,
+        sharedFolders: sharedFolders,
         user: req.user, 
         parentFolders: parentFolders
     });
@@ -119,7 +119,7 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
     if (!folderid) {
         // In root: show root files + promoted files
         const rootFiles = regularSharedFiles.filter(record => 
-            record.File.folderid === null || record.share_parents === false
+            record.File.folderid === null
         );
         filteredFiles = [...rootFiles, ...rootPromotedFiles];
     } else {
@@ -127,30 +127,66 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
             record.File.folderid === folderid
         );
     }
-    console.log("SHARED FILES BEFORE FILTERING: ", sharedFileRecords);
-    console.log("SHARED FILES AFTER FILTERING: ", filteredFiles);
     return { data: filteredFiles, error: null };
 }
 
-async function getAllSharedFolders(supabaseClient, userId) {
-    return supabaseClient
-        .from('Folder')
+async function getSharedFolders(supabaseClient, userId, folderid) {
+    const { data: sharedFolderRecords, error } = await supabaseClient
+        .from('SharedFolders')
         .select(`
             *,
-            User:userid (
+            Folder:folderid (
+                *
+            ),
+            User:shared_by (
                 email,
                 name
             )
         `)
-        .overlaps('shared_with', [userId]);
-}
+        .eq('shared_with', userId);
 
-function filterSharedFoldersByParent(allSharedFolders, folderid) {
-    if (!allSharedFolders) return [];
-    
-    return folderid
-        ? allSharedFolders.filter(folder => folder.parentid === folderid)
-        : allSharedFolders.filter(folder => folder.parentid === null);
+    if (error) {
+        return { data: null, error };
+    }
+
+    if (!sharedFolderRecords) {
+        return { data: [], error: null };
+    }
+
+    // Split folders into two categories
+    const regularSharedFolders = [];
+    const rootPromotedFolders = [];
+
+    sharedFolderRecords.forEach(record => {
+        const folder = record.Folder;
+        if (!folder) return;
+        
+        if (!record.share_parents) {
+            // Folders with share_parents always go to root
+            rootPromotedFolders.push(record);
+        } else {
+            // Regular shared folders follow normal folder structure
+            regularSharedFolders.push(record);
+        }
+    });
+
+    // Filter based on current location
+    let filteredFolders = [];
+
+    if (!folderid) {
+        // In root: show root folders + promoted folders
+        const rootFolders = regularSharedFolders.filter(record => 
+            record.Folder.parentid === null
+        );
+        filteredFolders = [...rootFolders, ...rootPromotedFolders];
+    } else {
+        // In folder: only show regular folders in this folder
+        filteredFolders = regularSharedFolders.filter(record => 
+            record.Folder.parentid === folderid
+        );
+    }
+    console.log("SHARED FOLDERS: ", filteredFolders);
+    return { data: filteredFolders, error: null };
 }
 
 function buildParentPath(currentFolderId, allFolders) {
