@@ -5,7 +5,6 @@ const shareEmail = document.getElementById("shareEmail");
 const shareLink = document.getElementById("shareLink");
 let currentShareItem = { id: null, name: null, type: null };
 
-// Share functionality
 function openShareModal(itemId, itemName, itemType) {
     currentShareItem = { id: itemId, name: itemName, type: itemType };
     shareModalTitle.textContent = `Share "${itemName}"`;
@@ -51,13 +50,6 @@ async function sendShare() {
     sendBtn.disabled = true;
     sendBtn.textContent = 'Sending...';
 
-    console.log('=== SHARE REQUEST DEBUG ===');
-    console.log('Current Share Item:', currentShareItem);
-    console.log('Email:', email);
-    console.log('Permissions:', permissions);
-    console.log('Request URL:', `/${currentShareItem.type}/share`);
-    console.log('==========================');
-
     try {
         const response = await fetch(`/${currentShareItem.type}/share`, {
             method: 'POST',
@@ -67,9 +59,8 @@ async function sendShare() {
             body: JSON.stringify({
                 itemId: currentShareItem.id,
                 itemName: currentShareItem.name,
-                itemType: currentShareItem.type,
                 email: email,
-                permissions: permissions
+                permissions: permissions,
             })
         });
 

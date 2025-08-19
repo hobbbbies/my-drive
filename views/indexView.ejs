@@ -14,18 +14,7 @@
             <%- include('partials/header', { user: user }) %>
         </div>
         
-        <!-- <div class="files-container">
-            <!-- Check if current folder is shared -->
-            <% console.log(locals.chosenFolder ) %>
-            <% if (locals.chosenFolder && locals.chosenFolder.userid !== user.id) { %>
-                <div class="shared-folder-notice">
-                    <i class="fas fa-info-circle"></i>
-                    <span>This is a shared folder - Only the owner can change its contents.</span>
-                </div>
-            <% } %> --> 
-            <!-- This doesnt work because indexView does not know what folder it is in!!!!!! -->
-            
-            <!-- Future implementation: path will be rendered here -->
+        <div class="files-container">            
             <div class="files-grid">
                 <!-- Regular folders (user's own) -->
                 <%if (locals.nestedFolders){ %>
@@ -81,15 +70,15 @@
                 <% if (locals.sharedFiles) { %>
                     <% sharedFiles.forEach((sharedFile) => { %>
                         <div class="file-item shared-file" 
-                        data-filename="<%= sharedFile.name %>"
-                        data-size="<%= sharedFile.size %> b"
-                        data-ext="<%= sharedFile.extension %>"
-                        data-added="<%= sharedFile.createdAt %>"
-                        data-folderid="<%= sharedFile.folderid %>"
-                        data-storagePath="<%= sharedFile.storagePath %>"
+                        data-filename="<%= sharedFile.File.name %>"
+                        data-size="<%= sharedFile.File.size %> b"
+                        data-ext="<%= sharedFile.File.extension %>"
+                        data-added="<%= sharedFile.File.createdAt %>"
+                        data-folderid="<%= sharedFile.File.folderid %>"
+                        data-storagePath="<%= sharedFile.File.storagePath %>"
                         >
                             <div class="file-icon">📄</div>
-                            <div class="file-name"><%= sharedFile.name %></div>
+                            <div class="file-name"><%= sharedFile.File.name %></div>
                             <span class="shared-indicator">Shared by <%= sharedFile.User.email %></span>
                             
                         </div>

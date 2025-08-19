@@ -833,20 +833,22 @@ body {
     color: #9aa0a6;
     margin-top: 4px;
     display: block;
-    opacity: 0;
+    opacity: 0.7;
     font-weight: 400;
     line-height: 1.2;
-    transition: opacity 0.2s ease;
 }
 
-/* Make shared files and folders slightly different but subtle */
-.file-item.shared-file,
-.folder-item.shared-folder {
+/* Make shared files slightly different but subtle */
+.file-item.shared-file {
     border-left: 2px solid #e8f0fe;
 }
 
-/* Show shared indicator on hover for both files and folders */
-.file-item.shared-file:hover .shared-indicator,
-.folder-item.shared-folder:hover .shared-indicator {
+/* Optional: Only show the shared indicator on hover for even less prominence */
+.shared-indicator {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.file-item.shared-file:hover, .shared-indicator {
     opacity: 0.7;
 }

@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { fileDelete } = require("./indexController");
-const { shareFile } = require("./fileController");
+const shareFile = require('../helpers/shareFile');
 
 async function folderPost (req, res) {
     try {
@@ -48,7 +48,7 @@ async function folderCreateGet(req, res) {
                             .from('Folder')
                             .select()
                             .eq('userid', req.user.id);
-                            
+
         if (error) {
             console.log("Error getting folders: ", error);
             res.status(500).json({ error: error.message });
@@ -64,30 +64,10 @@ async function folderDelete(req, res) {
         const isShared = req.query.shared === 'true';
         
         if (!isShared) {
-            // Regular folder deletion - delete the entire folder and contents
-            const { data: nestedFolders, error: selectError } = await req.supabaseClient
-                .from('Folder')
-                .select()
-                .eq('parentid', req.query.id);
-                
-            if (selectError) {
-                console.error("Error selecting nested folders:", selectError);
-                return res.status(500).send("Error finding nested folders");
-            }
-
-            const { data: files, error: fileError } = await req.supabaseClient
-                .from('File')
-                .select()
-                .eq('folderid', req.query.id);
-                
-            if (fileError) {
-                console.error("Error selecting nested files:", fileError);
-                return res.status(500).send("Error finding nested files");
-            }
-
+            // Get the parent folder info
             const { data: parentFolder, error: parentError } = await req.supabaseClient 
                 .from('Folder')
-                .select('name')
+                .select('id, name')
                 .eq('id', req.query.id)
                 .single();
                 
@@ -97,27 +77,16 @@ async function folderDelete(req, res) {
             }
             
             try {
-                await deleteAllFiles(req, files, parentFolder.name);
-                await folderDeleteRecursively(req, nestedFolders);
+                // Pass parentFolder as array to match the recursive function pattern
+                await deleteFoldersRecursively(req, [parentFolder]);
             } catch(error) {
                 console.error(error);
                 return res.status(500).send("Error in helper functions");
             }
-
-            // Delete the main folder from database
-            const { error: folderError } = await req.supabaseClient
-                .from('Folder')
-                .delete()
-                .eq('id', req.query.id);
-                
-            if (folderError) {
-                console.error("Error deleting folder: ", folderError.message);
-                return res.status(500).send("Error deleting folder on the DB side.");
-            }
         } else {
             // Shared folder deletion - remove user from shared_with array using RPC
             const { error: updateError } = await req.supabaseClient
-                .rpc("remove_user_from_shared_folder", { // You'll need to create this stored procedure
+                .rpc("remove_user_from_shared_folder", {
                     folder_id: req.query.id,
                     user_id: req.user.id
                 });
@@ -136,45 +105,49 @@ async function folderDelete(req, res) {
     }
 }
 
-async function folderDeleteRecursively(req, folders) {
+async function deleteFoldersRecursively(req, folders) {
     // base case - ends if no nested folders 
     if (!folders || !folders.length) return;
+    
     for (const folder of folders) {
+        // Get nested folders for recursion
         const { data: nestedFolders, error: selectError } = await req.supabaseClient
                                     .from('Folder')
                                     .select()
                                     .eq('parentid', folder.id);
         if (selectError) {
             console.log(selectError);
-            throw selectError;  // Changed from return to throw
+            throw selectError;
         }              
+        
         // Recursively call function on nested folders
-        await folderDeleteRecursively(req, nestedFolders);
+        await deleteFoldersRecursively(req, nestedFolders);
 
-        // Selects all files inside nested folders for deletion
+        // Selects all files inside current folder for deletion
         const { data: files, error: fileError } = await req.supabaseClient
                                                 .from('File')
                                                 .select()
                                                 .eq('folderid', folder.id);
         if (fileError) {
             console.log(fileError);
-            throw fileError;  // Changed from return to throw
+            throw fileError;
         }
+        
         // Deletes all selected files
         try {
             await deleteAllFiles(req, files, folder.name);
         } catch(error) {
-            throw error;  // Changed from return to throw
+            throw error;
         }
 
-        // deletes nested folder
+        // Delete the folder itself last
         const { error: folderError } = await req.supabaseClient    
                                             .from('Folder')
                                             .delete()
                                             .eq('id', folder.id);
         if (folderError) {
             console.log(folderError);
-            throw folderError;  // Changed from return to throw
+            throw folderError;
         }
     }
 }
@@ -260,44 +233,27 @@ async function shareAllFiles(req, files, email) {
     const sharedToUserId = userData.id;
 
     for (const file of files) {
-        const { data: fileInfo, error: fetchError } = await req.supabaseClient
-            .from("File")
-            .select("shared_with, userid")
-            .eq("id", file.id)
-            .single();
+        try {
+            const result = await shareFile(
+                req.supabaseClient,
+                req.user.id,
+                file.storagePath,
+                sharedToUserId,
+                'view',
+                true   
+            );
 
-        if (fetchError || !fileInfo) {
-            console.error("Error fetching file info:", fetchError);
-            throw new Error(`File not found: ${file.id}`);
-        }
+            if (result.success) {
+                console.log(`Successfully shared file ${file.id} with ${email}`);
+            } else if (result.alreadyShared) {
+                console.log(`File ${file.id} already shared with ${email}`);
+            } else {
+                console.error(`Error sharing file ${file.id}:`, result.error);
+            }
 
-        // // Check if user owns the file
-        // if (fileInfo.userid !== req.user.id) {
-        //     console.error(`User does not own file: ${file.id}`);
-        //     continue; // Skip this file instead of throwing error
-        // }
-
-        // Get current shared_with array or initialize as empty array
-        let currentSharedWith = fileInfo.shared_with || [];
-
-        // Check if user is already in the shared_with array
-        if (currentSharedWith.includes(sharedToUserId)) {
-            console.log(`File ${file.id} already shared with user ${email}`);
-            continue; // Skip if already shared
-        }
-
-        // Add the new user ID to the shared_with array
-        const updatedSharedWith = [...currentSharedWith, sharedToUserId];
-
-        // Update the file with the new shared_with array
-        const { error: updateError } = await req.supabaseClient
-            .from("File")
-            .update({ shared_with: updatedSharedWith })
-            .eq("id", file.id);
-
-        if (updateError) {
-            console.error("Error updating file shared_with:", updateError);
-            throw new Error(`Failed to share file: ${file.id}`);
+        } catch (error) {
+            console.error(`Error sharing file ${file.id} with ${email}:`, error.message);
+            // Continue with next file instead of throwing
         }
     }
 }

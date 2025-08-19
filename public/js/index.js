@@ -10,7 +10,7 @@ const fileItems = document.querySelectorAll(".file-item");
 const closeBtn = document.querySelector(".close");
 
 // Store current file info for sharing
-let currentFileForSharing = { path: null, name: null };
+let currentFileForSharing = { pathOrId: null, name: null };
 
 // File item click handlers
 fileItems.forEach((item) => {
@@ -30,7 +30,7 @@ fileItems.forEach((item) => {
         const isSharedFile = item.classList.contains('shared-file');
         
         // Store file info for sharing (use storagePath as unique identifier)
-        currentFileForSharing = { path: storagePath, name: fileName };
+        currentFileForSharing = { pathOrId: storagePath, name: fileName };
         
         const trimmedAdded = new Date(fileAdded).toLocaleDateString();
         // Update modal content
@@ -66,10 +66,10 @@ window.onclick = (event) => {
  * @param {string} type - The type of item being shared ('file' or 'folder')
  */
 function shareFromModal() {
-    if (currentFileForSharing.path && currentFileForSharing.name) {
+    if (currentFileForSharing.pathOrId && currentFileForSharing.name) {
         // Close file details modal
         modal.style.display = "none";
-        openShareModal(currentFileForSharing.path, currentFileForSharing.name, 'file');
+        openShareModal(currentFileForSharing.pathOrId, currentFileForSharing.name, 'file');
     }
 }
 
