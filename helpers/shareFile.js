@@ -35,7 +35,7 @@ async function shareFile(supabaseClient, currentUserId, storagePath, recipientId
           shared_by: currentUserId,
           shared_with: recipientId,
           permissions: permissions || 'view',
-          shareParents: shareParents || false
+          share_parents: shareParents || false
       });
 
     if (shareError) {

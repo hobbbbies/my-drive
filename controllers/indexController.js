@@ -88,6 +88,34 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         `)
         .eq('shared_with', userId);
 
+    // DEBUG: Check if the file exists
+    if (sharedFileRecords && sharedFileRecords.length > 0) {
+        for (const record of sharedFileRecords) {
+            console.log("Checking file_path:", record.file_path);
+            
+            const { data: fileExists, error: fileError } = await supabaseClient
+                .from('File')
+                .select('*')
+                .eq('storagePath', record.file_path)
+                .single();
+                
+            console.log("File exists:", !!fileExists, fileError?.message);
+            
+            if (!fileExists) {
+                console.log("File not found in File table for path:", record.file_path);
+                
+                // Check what files do exist:
+                const { data: allFiles } = await supabaseClient
+                    .from('File')
+                    .select('storagePath')
+                    .ilike('storagePath', '%Screenshot%')
+                    .limit(5);
+                    
+                console.log("Similar files:", allFiles);
+            }
+        }
+    }
+
     if (error) {
         return { data: null, error };
     }

@@ -6,6 +6,7 @@ const modalExt = document.getElementById("modal-ext");
 const modalAdded = document.getElementById("modal-added");
 const downloadLink = document.getElementById("download-link");
 const deleteLink = document.getElementById("delete-link");
+const shareButton = document.getElementById("share-link"); // Add this line
 const fileItems = document.querySelectorAll(".file-item");
 const closeBtn = document.querySelector(".close");
 
@@ -29,10 +30,17 @@ fileItems.forEach((item) => {
         // Check if this is a shared file
         const isSharedFile = item.classList.contains('shared-file');
         
-        // Store file info for sharing (use storagePath as unique identifier)
-        currentFileForSharing = { pathOrId: storagePath, name: fileName };
+        // Handle share button visibility and functionality
+        if (isSharedFile) {
+            shareButton.style.display = 'none'; 
+            currentFileForSharing = { pathOrId: null, name: null };
+        } else {
+            shareButton.style.display = 'inline-block';
+            currentFileForSharing = { pathOrId: storagePath, name: fileName };
+        }
         
         const trimmedAdded = new Date(fileAdded).toLocaleDateString();
+        
         // Update modal content
         modalTitle.textContent = fileName;
         modalSize.textContent = fileSize || "--";
