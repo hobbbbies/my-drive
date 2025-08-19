@@ -48,8 +48,8 @@ fileItems.forEach((item) => {
         modalAdded.textContent = trimmedAdded || "--";
 
         // Set download link
-        downloadLink.setAttribute("href", `/download/?storagePath=${encodeURIComponent(storagePath)}`);
-        deleteLink.setAttribute("href", `/delete/?storagePath=${encodeURIComponent(storagePath)}&shared=${!!isSharedFile}`);
+        downloadLink.setAttribute("href", `/file/download/?storagePath=${encodeURIComponent(storagePath)}`);
+        deleteLink.setAttribute("href", `/file/delete/?storagePath=${encodeURIComponent(storagePath)}&shared=${!!isSharedFile}`);
 
         // Show the modal
         modal.style.display = "block";

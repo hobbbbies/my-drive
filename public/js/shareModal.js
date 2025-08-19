@@ -66,12 +66,11 @@ async function sendShare() {
         const data = await response.json();
 
         if (response.ok) {
+            // Handle both file and folder sharing responses
             if (data.alreadyShared) {
-                // Show info message instead of success
                 showMessage(`Already shared with ${email}`, 'info');
             } else {
-                // Show success message
-                showMessage(`Successfully shared with ${email}!`, 'success');
+                showMessage(data.message || `Successfully shared with ${email}!`, 'success');
             }
             
             shareEmail.value = '';

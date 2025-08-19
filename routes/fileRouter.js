@@ -14,4 +14,8 @@ router.post("/", userAuth, attachClient, upload.single('file'), controller.fileP
 
 router.post("/share", userAuth, attachClient, controller.fileShare);
 
+router.get("/delete", userAuth, attachClient, controller.fileDelete);
+
+router.get("/download", userAuth, attachClient, controller.fileDownload);
+
 module.exports = router;

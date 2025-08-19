@@ -41,9 +41,6 @@
                             <button class="delete-folder" onclick="event.stopPropagation(); deleteFolder('<%= sharedFolder.id %>', true)">
                                 <i class="fas fa-trash"></i>
                             </button>
-                            <button class="share-folder" onclick="event.stopPropagation(); openShareModal('<%= sharedFolder.id %>', '<%= sharedFolder.name %>', 'folder')">
-                                <i class="fas fa-share-alt"></i>
-                            </button>
                             <span class="shared-indicator">Shared by <%= sharedFolder.User.email %></span>
                         </div>
                     <% }); %>

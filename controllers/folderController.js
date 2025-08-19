@@ -23,19 +23,7 @@ async function folderPost (req, res) {
                 return res.status(500).send("Error creating folder");
             }
         }
-
-        // const { error: storageError} = await req.supabaseClient
-        //     .storage
-        //     .from('uploads') 
-        //     .upload(folderName);
-
-        // if (storageError) {
-        //     console.error("Error creating folder in storage:", storageError);
-        //     return res.status(500).send("Error uploading folder into storage");
-        // }
-
-        const referrer = req.get('Referer') || '/';
-        res.redirect(referrer);
+        res.redirect("/");
   } catch (error) {
         console.error("Server error: ", error);
         res.status(500).json({ error: error.message });
