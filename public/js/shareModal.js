@@ -58,27 +58,47 @@ async function sendShare() {
             },
             body: JSON.stringify({
                 itemId: currentShareItem.id,
-                itemName: currentShareItem.name,
                 email: email,
                 permissions: permissions,
             })
         });
 
+        const data = await response.json();
+
         if (response.ok) {
-            document.getElementById('shareSuccess').style.display = 'block';
-            document.getElementById('shareError').style.display = 'none';
+            if (data.alreadyShared) {
+                // Show info message instead of success
+                showMessage(`Already shared with ${email}`, 'info');
+            } else {
+                // Show success message
+                showMessage(`Successfully shared with ${email}!`, 'success');
+            }
+            
             shareEmail.value = '';
+            setTimeout(() => {
+                shareModal.style.display = 'none';
+            }, 1500);
         } else {
-            throw new Error('Failed to send share');
+            showMessage(data.error || 'Failed to share', 'error');
         }
     } catch (error) {
-        console.error('Share error:', error);
-        document.getElementById('shareError').style.display = 'block';
-        document.getElementById('shareSuccess').style.display = 'none';
+        console.error('Error:', error);
+        showMessage('Failed to share. Please try again.', 'error');
     } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = 'Send';
     }
+}
+
+function showMessage(message, type) {
+    // You can style these differently: success (green), info (blue), error (red)
+    const messageEl = type === 'error' ? shareError : shareSuccess;
+    messageEl.textContent = message;
+    messageEl.style.display = 'block';
+    
+    setTimeout(() => {
+        messageEl.style.display = 'none';
+    }, 3000);
 }
 
 function copyShareLink() {

@@ -128,7 +128,8 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
             record.File.folderid === folderid
         );
     }
-
+    console.log("SHARED FILES BEFORE FILTERING: ", sharedFileRecords);
+    console.log("SHARED FILES AFTER FILTERING: ", filteredFiles);
     return { data: filteredFiles, error: null };
 }
 

@@ -218,16 +218,16 @@ async function fileShare(req, res) {
     );
 
     if (!result.success) {
-      if (result.alreadyShared) {
-        return res.status(400).json({ error: result.message });
-      }
       return res.status(500).json({ error: result.error });
     }
 
+    // Both new shares and already-shared cases are successful
     res.status(200).json({
       message: result.message,
       sharedWith: email,
+      alreadyShared: result.alreadyShared || false
     });
+
   } catch (error) {
     console.error("Share file error:", error);
     res.status(500).json({ error: "Error sharing file" });

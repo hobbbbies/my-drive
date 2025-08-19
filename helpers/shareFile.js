@@ -20,8 +20,9 @@ async function shareFile(supabaseClient, currentUserId, storagePath, recipientId
     }
 
     if (existingShare) {
+      // This is NOT an error - just return success with info message
       return { 
-        success: false, 
+        success: true, 
         alreadyShared: true, 
         message: "File is already shared with this user" 
       };
@@ -34,7 +35,7 @@ async function shareFile(supabaseClient, currentUserId, storagePath, recipientId
           shared_by: currentUserId,
           shared_with: recipientId,
           permissions: permissions || 'view',
-          share_parents: shareParents || false
+          shareParents: shareParents || false
       });
 
     if (shareError) {
