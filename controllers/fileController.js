@@ -92,9 +92,10 @@ async function fileGet(req, res) {
 
 async function fileDelete(req, res) {
   try {
-    const shared  = req.query.shared === 'true';
-    // First, get the file info from database to get the storage path
+    const shared = req.query.shared === 'true';
+    
     if (!shared) {
+      // Deleting own file - remove file completely
       const { data: fileInfo, error: fetchError } = await req.supabaseClient
         .from("File")
         .select("storagePath")
@@ -106,7 +107,18 @@ async function fileDelete(req, res) {
         return res.status(404).send("File not found");
       }
 
-      // Delete from database first
+      // Delete all SharedFiles records that reference this file first
+      const { error: sharedDeleteError } = await req.supabaseClient
+        .from("SharedFiles")
+        .delete()
+        .eq("file_path", req.query.storagePath);
+
+      if (sharedDeleteError) {
+        console.error("Error deleting shared file records: ", sharedDeleteError.message);
+        return res.status(400).send("Error removing file shares");
+      }
+
+      // Delete from File table
       const { error: dbError } = await req.supabaseClient
         .from("File")
         .delete()
@@ -127,21 +139,23 @@ async function fileDelete(req, res) {
         console.error("Warning: File deleted from DB but not from storage");
       }
     } else {
-      const { error: updateError } = await req.supabaseClient
-        .rpc("remove_user_from_shared_file", { // Custom stored procedure to bypass RLS
-            file_storage_path: req.query.storagePath,
-            user_id: req.user.id
-        });
+      // Removing shared file - only remove the share record for this user
+      const { error: removeShareError } = await req.supabaseClient
+        .from("SharedFiles")
+        .delete()
+        .eq("file_path", req.query.storagePath)
+        .eq("shared_with", req.user.id);
 
-      if (updateError) {
-        console.error("Error updating file shared_with: ", updateError.message);
+      if (removeShareError) {
+        console.error("Error removing shared file: ", removeShareError.message);
         return res.status(400).send("Error removing file from shared list");
       }
     }
+    
     const referrer = req.get("Referer") || "/";
     res.redirect(referrer);
   } catch (error) {
-    console.error(error);
+    console.error("Error in fileDelete:", error);
     res.status(500).send("Error deleting file");
   }
 }

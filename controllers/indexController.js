@@ -88,34 +88,6 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         `)
         .eq('shared_with', userId);
 
-    // DEBUG: Check if the file exists
-    if (sharedFileRecords && sharedFileRecords.length > 0) {
-        for (const record of sharedFileRecords) {
-            console.log("Checking file_path:", record.file_path);
-            
-            const { data: fileExists, error: fileError } = await supabaseClient
-                .from('File')
-                .select('*')
-                .eq('storagePath', record.file_path)
-                .single();
-                
-            console.log("File exists:", !!fileExists, fileError?.message);
-            
-            if (!fileExists) {
-                console.log("File not found in File table for path:", record.file_path);
-                
-                // Check what files do exist:
-                const { data: allFiles } = await supabaseClient
-                    .from('File')
-                    .select('storagePath')
-                    .ilike('storagePath', '%Screenshot%')
-                    .limit(5);
-                    
-                console.log("Similar files:", allFiles);
-            }
-        }
-    }
-
     if (error) {
         return { data: null, error };
     }
@@ -132,7 +104,7 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         const file = record.File;
         if (!file) return;
 
-        if (record.shareParents) {
+        if (!record.shareParents) {
             // Files with shareParents always go to root
             rootPromotedFiles.push(record);
         } else {
@@ -147,7 +119,7 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
     if (!folderid) {
         // In root: show root files + promoted files
         const rootFiles = regularSharedFiles.filter(record => 
-            record.File.folderid === null
+            record.File.folderid === null || record.share_parents === false
         );
         filteredFiles = [...rootFiles, ...rootPromotedFiles];
     } else {
