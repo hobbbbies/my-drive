@@ -113,7 +113,7 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         }
     });
 
-    // Filter based on current location
+    // Filter based on current path
     let filteredFiles = [];
 
     if (!folderid) {
@@ -123,7 +123,6 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         );
         filteredFiles = [...rootFiles, ...rootPromotedFiles];
     } else {
-        // In folder: only show regular files in this folder
         filteredFiles = regularSharedFiles.filter(record => 
             record.File.folderid === folderid
         );
