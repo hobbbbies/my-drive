@@ -22,6 +22,7 @@ fileItems.forEach((item) => {
         // Get file metadata from data attributes
         const fileName = item.getAttribute("data-filename");
         const uniqueFileName = item.getAttribute("data-uniqueFileName");
+        console.log("unique_fname: ", uniqueFileName);
         const fileSize = item.getAttribute("data-size");
         const fileExt = item.getAttribute("data-ext");
         const fileAdded = item.getAttribute("data-added");
@@ -48,8 +49,8 @@ fileItems.forEach((item) => {
         modalAdded.textContent = trimmedAdded || "--";
 
         // Set download link
-        downloadLink.setAttribute("href", `/file/download/?uniqueFileName=${uniqueFileName}`);
-        deleteLink.setAttribute("href", `/file/delete/?uniqueFileName=${uniqueFileName}&shared=${!!isSharedFile}`);
+        downloadLink.setAttribute("href", `/file/download/?uniqueFileName=${encodeURIComponent(uniqueFileName)}`);
+        deleteLink.setAttribute("href", `/file/delete/?uniqueFileName=${encodeURIComponent(uniqueFileName)}&shared=${!!isSharedFile}`);
 
         // Show the modal
         modal.style.display = "block";

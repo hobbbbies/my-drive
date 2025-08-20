@@ -1,13 +1,13 @@
 async function deleteFile(supabaseClient, unique_fname, userId) {
       // Delete all SharedFiles records that reference this file first
-      const { error: sharedDeleteError } = await req.supabaseClient
+      const { error: sharedDeleteError } = await supabaseClient
         .from("SharedFiles")
         .delete()
-        .eq("file_name", req.query.unique_fname);
+        .eq("file_name", unique_fname);
 
       if (sharedDeleteError) {
         console.error("Error deleting shared file records: ", sharedDeleteError.message);
-        return res.status(400).send("Error removing file shares");
+        throw sharedDeleteError;
       }
     
     // Remove from storage

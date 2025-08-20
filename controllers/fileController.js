@@ -86,9 +86,9 @@ async function fileGet(req, res) {
 }
 
 async function fileDelete(req, res) {
+  console.log('req.query: ', req.query);
   try {
     const shared = req.query.shared === 'true';
-    
     if (!shared) {
       // Deleting own file - remove file completely
       const { data: fileInfo, error: fetchError } = await req.supabaseClient
@@ -101,13 +101,13 @@ async function fileDelete(req, res) {
         console.error("Error fetching file info: ", fetchError);
         return res.status(404).send("File not found");
       }
-      await fileDelete(req.supabaseClient, fileInfo.unique_fname, req.user.id);
+      await deleteFile(req.supabaseClient, fileInfo.unique_fname, req.user.id);
     } else {
       // Removing shared file - only remove the share record for this user
       const { error: removeShareError } = await req.supabaseClient
         .from("SharedFiles")
         .delete()
-        .eq("file_name", req.query.unique_fname)
+        .eq("file_path", req.query.unique_fname)
         .eq("shared_with", req.user.id);
 
       if (removeShareError) {
