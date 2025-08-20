@@ -84,15 +84,22 @@ async function folderDelete(req, res) {
             }
         } else {
             // Removing shared folder - only remove the share record for this user
-            const { error: removeShareError } = await req.supabaseClient
-                .from("SharedFolders")
-                .delete()
-                .eq("folderid", req.query.id)
-                .eq("shared_with", req.user.id);
+            const { data: parentFolder, error: parentError } = await req.supabaseClient
+                .from('Folder')
+                .select('id, name')
+                .eq('id', req.query.id)
+                .single();
 
-            if (removeShareError) {
-                console.error("Error removing shared folder: ", removeShareError.message);
-                return res.status(400).send("Error removing folder from shared list");
+            if (parentError) {
+                console.error("Error selecting parent folder:", parentError);
+                return res.status(500).send("Error selecting parent folder");
+            }
+
+            try {
+                await unshareFoldersRecursively(req, [parentFolder], req.user.id);
+            } catch (error) {
+                console.error(error);
+                return res.status(500).send("Error unsharing folder and its contents");
             }
         }
         
@@ -210,7 +217,7 @@ async function shareFolderController(req, res) {
 
         try {
             // Pass parentFolder as array with email parameter
-            await shareFoldersRecursively(req, [parentFolder], userData.id);
+            await shareFoldersRecursively(req, [parentFolder], userData.id, false);
         } catch(error) {
             console.error(error);
             return res.status(500).send("Error sharing folder");
@@ -228,13 +235,13 @@ async function shareFolderController(req, res) {
     }
 }
 
-async function shareFoldersRecursively(req, folders, recipientId) {
+async function shareFoldersRecursively(req, folders, recipientId, shareParents=true) {
     // base case - ends if no nested folders 
     if (!folders || !folders.length) return;
     
     for (const folder of folders) {
         // Share the current folder using the helper function
-        await shareFolder(req.supabaseClient, folder, recipientId, req.user.id);
+        await shareFolder(req.supabaseClient, folder, recipientId, req.user.id, shareParents);
 
         // Get nested folders for recursion
         const { data: nestedFolders, error: selectError } = await req.supabaseClient
@@ -268,7 +275,7 @@ async function shareFoldersRecursively(req, folders, recipientId) {
     }
 }
 
-async function shareFolder(supabaseClient, folder, recipientId, currentUserId) {
+async function shareFolder(supabaseClient, folder, recipientId, currentUserId, shareParents) {
     try {
         // Validate input
         if (!folder.id || !recipientId) {
@@ -309,10 +316,10 @@ async function shareFolder(supabaseClient, folder, recipientId, currentUserId) {
             .from('SharedFolders')
             .insert({
                 folderid: folder.id,
-                shared_by: currentUserId, // Use the passed currentUserId
+                shared_by: currentUserId, 
                 shared_with: recipientId,
                 permissions: 'view', // Default permission
-                share_parents: true // Default value
+                share_parents: shareParents 
             });
 
         if (shareError) {
@@ -359,6 +366,47 @@ async function shareAllFiles(req, files, recipientId) {
         } catch (error) {
             console.error(`Error sharing file ${file.id} with user ${recipientId}:`, error.message);
         }
+    }
+}
+
+async function unshareFoldersRecursively(req, folders, userId) {
+    if (!folders || !folders.length) return;
+
+    for (const folder of folders) {
+        // Remove share for this folder
+        await req.supabaseClient
+            .from("SharedFolders")
+            .delete()
+            .eq("folderid", folder.id)
+            .eq("shared_with", userId);
+
+        // Remove share for all files in this folder
+        const { data: files, error: fileError } = await req.supabaseClient
+            .from('File')
+            .select()
+            .eq('folderid', folder.id);
+        if (fileError) {
+            console.log(fileError);
+            throw fileError;
+        }
+        for (const file of files) {
+            await req.supabaseClient
+                .from("SharedFiles")
+                .delete()
+                .eq("file_path", file.storagePath)
+                .eq("shared_with", userId);
+        }
+
+        // Get nested folders and recurse
+        const { data: nestedFolders, error: selectError } = await req.supabaseClient
+            .from('Folder')
+            .select()
+            .eq('parentid', folder.id);
+        if (selectError) {
+            console.log(selectError);
+            throw selectError;
+        }
+        await unshareFoldersRecursively(req, nestedFolders, userId);
     }
 }
 
