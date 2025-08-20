@@ -8,9 +8,6 @@ async function indexGet(req, res) {
     // Get user's own files
     const { data: files, error: fileError } = await getUserFiles(req.supabaseClient, req.user.id, folderid);
     
-    console.log('userid: ', req.user.id);
-    console.log('folderid: ', folderid);
-    
     // Get shared files
     const { data: sharedFiles, error: sharedFileError } = await getSharedFiles(req.supabaseClient, req.user.id, folderid);
     
@@ -50,9 +47,6 @@ async function indexGet(req, res) {
         parentFolders = [];
     }
 
-    console.log("All accessible folders: ", allAccessibleFolders);
-    console.log("parentFolders: ", parentFolders);
-   
     res.render('indexView', { 
         headerTitle: "MyDrive", 
         rootFolders: rootFolders, 
@@ -82,7 +76,7 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         .from('SharedFiles')
         .select(`
             *,
-            File:file_path (
+            File:file_name (
                 *
             ),
             User:shared_by (
@@ -132,7 +126,6 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         );
     }
 
-    console.log("FOLDERID: ", folderid)
     return { data: filteredFiles, error: null };
 }
 
@@ -191,8 +184,6 @@ async function getSharedFolders(supabaseClient, userId, folderid) {
             record.Folder.parentid === folderid
         );
     }
-
-    console.log("FILTERED FOLDERS: ", filteredFolders);   
     return { data: { sharedFolderRecords, filteredFolders }, error: null };
 }
 

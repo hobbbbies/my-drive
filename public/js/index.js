@@ -21,7 +21,7 @@ fileItems.forEach((item) => {
         
         // Get file metadata from data attributes
         const fileName = item.getAttribute("data-filename");
-        const storagePath = item.getAttribute("data-storagePath");
+        const uniqueFileName = item.getAttribute("data-uniqueFileName");
         const fileSize = item.getAttribute("data-size");
         const fileExt = item.getAttribute("data-ext");
         const fileAdded = item.getAttribute("data-added");
@@ -36,7 +36,7 @@ fileItems.forEach((item) => {
             currentFileForSharing = { pathOrId: null, name: null };
         } else {
             shareButton.style.display = 'inline-block';
-            currentFileForSharing = { pathOrId: storagePath, name: fileName };
+            currentFileForSharing = { pathOrId: uniqueFileName, name: fileName };
         }
         
         const trimmedAdded = new Date(fileAdded).toLocaleDateString();
@@ -48,8 +48,8 @@ fileItems.forEach((item) => {
         modalAdded.textContent = trimmedAdded || "--";
 
         // Set download link
-        downloadLink.setAttribute("href", `/file/download/?storagePath=${encodeURIComponent(storagePath)}`);
-        deleteLink.setAttribute("href", `/file/delete/?storagePath=${encodeURIComponent(storagePath)}&shared=${!!isSharedFile}`);
+        downloadLink.setAttribute("href", `/file/download/?uniqueFileName=${uniqueFileName}`);
+        deleteLink.setAttribute("href", `/file/delete/?uniqueFileName=${uniqueFileName}&shared=${!!isSharedFile}`);
 
         // Show the modal
         modal.style.display = "block";

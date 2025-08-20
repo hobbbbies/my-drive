@@ -55,7 +55,7 @@
                         data-ext="<%= file.extension %>"
                         data-added="<%= file.createdAt %>"
                         data-folderid="<%= file.folderid %>"
-                        data-storagePath="<%= file.storagePath %>"
+                        data-uniqueFileName="<%= file.unique_fname %>"
                         >
                             <div class="file-icon">📄</div>
                             <div class="file-name"><%= file.name %></div>
@@ -72,7 +72,7 @@
                         data-ext="<%= sharedFile.File.extension %>"
                         data-added="<%= sharedFile.File.createdAt %>"
                         data-folderid="<%= sharedFile.File.folderid %>"
-                        data-storagePath="<%= sharedFile.File.storagePath %>"
+                        data-uniqueFileName="<%= sharedFile.File.unique_fname %>"
                         >
                             <div class="file-icon">📄</div>
                             <div class="file-name"><%= sharedFile.File.name %></div>

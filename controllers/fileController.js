@@ -94,42 +94,20 @@ async function fileDelete(req, res) {
       const { data: fileInfo, error: fetchError } = await req.supabaseClient
         .from("File")
         .select("unique_fname")
-        .eq("unique_fname", req.query.unique_fname)
+        .eq("unique_fname", req.query.uniqueFileName)
         .single();
 
       if (fetchError || !fileInfo) {
         console.error("Error fetching file info: ", fetchError);
         return res.status(404).send("File not found");
       }
-
-      // Delete all SharedFiles records that reference this file first
-      const { error: sharedDeleteError } = await req.supabaseClient
-        .from("SharedFiles")
-        .delete()
-        .eq("file_path", req.query.unique_fname);
-
-      if (sharedDeleteError) {
-        console.error("Error deleting shared file records: ", sharedDeleteError.message);
-        return res.status(400).send("Error removing file shares");
-      }
-
-      await fileDelete(req.supabaseClient, fileInfo.unique_fname, req.user.id)''
-
-      // Delete from storage using the storage path
-      const { error: storageError } = await req.supabaseClient.storage
-        .from("uploads")
-        .remove([fileInfo.unique_fname]);
-
-      if (storageError) {
-        console.error("Error deleting from storage: ", storageError.message);
-        console.error("Warning: File deleted from DB but not from storage");
-      }
+      await fileDelete(req.supabaseClient, fileInfo.unique_fname, req.user.id);
     } else {
       // Removing shared file - only remove the share record for this user
       const { error: removeShareError } = await req.supabaseClient
         .from("SharedFiles")
         .delete()
-        .eq("file_path", req.query.unique_fname)
+        .eq("file_name", req.query.unique_fname)
         .eq("shared_with", req.user.id);
 
       if (removeShareError) {

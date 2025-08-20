@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { fileDelete } = require("./indexController");
+const deleteFile = require("../helpers/deleteFile");
 const shareFile = require('../helpers/shareFile');
 
 async function folderPost (req, res) {
@@ -160,22 +160,11 @@ async function deleteFoldersRecursively(req, folders) {
 
 async function deleteAllFiles(req, files, folderName) {
     for (const file of files) {
-        const { error: fileError } = await req.supabaseClient
-                                                .from('File')
-                                                .delete()
-                                                .eq('storagePath', file.storagePath); 
-        if (fileError) {
-            console.log(fileError);
-            throw fileError;
-        }
-
-        const { error: storageError } = await req.supabaseClient
-                                                .storage
-                                                .from('uploads')
-                                                .remove([`${folderName}/${file.id}`])    
-        if (storageError) {
-            console.log(storageError);
-            throw new Error(storageError.message || "Error removing file from storage");  // Added error message
+        try {
+            await fileDelete(req.supabaseClient, file.unique_fname, req.user.id);
+        } catch (error) {
+            console.log(error);
+            throw error;
         }
     }
 }
