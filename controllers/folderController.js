@@ -349,7 +349,7 @@ async function shareAllFiles(req, files, recipientId) {
             const result = await shareFile(
                 req.supabaseClient,
                 req.user.id,
-                file.storagePath,
+                file.unique_fname,
                 recipientId, // Use recipientId directly
                 'view',
                 true   
@@ -393,7 +393,7 @@ async function unshareFoldersRecursively(req, folders, userId) {
             await req.supabaseClient
                 .from("SharedFiles")
                 .delete()
-                .eq("file_path", file.storagePath)
+                .eq("file_name", file.unique_fname)
                 .eq("shared_with", userId);
         }
 

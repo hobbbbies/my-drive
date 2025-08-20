@@ -1,7 +1,7 @@
-const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 const path = require("path");
 const shareFile = require('../helpers/shareFile');
+const deleteFile = require('../helpers/deleteFile');
 
 // Function to sanitize filename
 function sanitizeFilename(filename) {
@@ -28,14 +28,9 @@ async function filePost(req, res) {
       }
     }
 
-    const folderName = folder ? folder.name : "";
-    const storagePath = folderName
-      ? `${folderName}/${uniqueFileName}`
-      : uniqueFileName;
-
     const { error: uploadError } = await req.supabaseClient.storage
       .from("uploads")
-      .upload(storagePath, file.buffer, {
+      .upload(uniqueFileName, file.buffer, {
         contentType: file.mimetype,
         upsert: false,
       });
@@ -50,7 +45,7 @@ async function filePost(req, res) {
       name: originalBaseName,
       size: file.size,
       extension: ext,
-      storagePath: storagePath, // Only store storagePath
+      unique_fname: uniqueFileName, 
       folderid: folder.id || null,
       userid: req.user.id,
     });
@@ -59,7 +54,7 @@ async function filePost(req, res) {
       console.error("Database insert error:", dbError);
 
       // Clean up the uploaded file
-      await req.supabaseClient.storage.from("uploads").remove([storagePath]);
+      await req.supabaseClient.storage.from("uploads").remove([unique_fname]);
 
       return res.status(400).send("Error saving file information");
     }
@@ -98,8 +93,8 @@ async function fileDelete(req, res) {
       // Deleting own file - remove file completely
       const { data: fileInfo, error: fetchError } = await req.supabaseClient
         .from("File")
-        .select("storagePath")
-        .eq("storagePath", req.query.storagePath)
+        .select("unique_fname")
+        .eq("unique_fname", req.query.unique_fname)
         .single();
 
       if (fetchError || !fileInfo) {
@@ -111,28 +106,19 @@ async function fileDelete(req, res) {
       const { error: sharedDeleteError } = await req.supabaseClient
         .from("SharedFiles")
         .delete()
-        .eq("file_path", req.query.storagePath);
+        .eq("file_path", req.query.unique_fname);
 
       if (sharedDeleteError) {
         console.error("Error deleting shared file records: ", sharedDeleteError.message);
         return res.status(400).send("Error removing file shares");
       }
 
-      // Delete from File table
-      const { error: dbError } = await req.supabaseClient
-        .from("File")
-        .delete()
-        .eq("storagePath", req.query.storagePath);
-
-      if (dbError) {
-        console.error("Error deleting file from DB: ", dbError.message);
-        return res.status(400).send("Error deleting file from database");
-      }
+      await fileDelete(req.supabaseClient, fileInfo.unique_fname, req.user.id)''
 
       // Delete from storage using the storage path
       const { error: storageError } = await req.supabaseClient.storage
         .from("uploads")
-        .remove([fileInfo.storagePath]);
+        .remove([fileInfo.unique_fname]);
 
       if (storageError) {
         console.error("Error deleting from storage: ", storageError.message);
@@ -143,7 +129,7 @@ async function fileDelete(req, res) {
       const { error: removeShareError } = await req.supabaseClient
         .from("SharedFiles")
         .delete()
-        .eq("file_path", req.query.storagePath)
+        .eq("file_path", req.query.unique_fname)
         .eq("shared_with", req.user.id);
 
       if (removeShareError) {
@@ -165,8 +151,8 @@ async function fileDownload(req, res) {
     // Get file info from database first
     const { data: fileInfo, error: fetchError } = await req.supabaseClient
       .from("File")
-      .select("name, extension, storagePath")
-      .eq("storagePath", req.query.storagePath)
+      .select("name, extension, unique_fname")
+      .eq("unique_fname", req.query.uniqueFileName)
       .single();
 
     if (fetchError || !fileInfo) {
@@ -177,7 +163,7 @@ async function fileDownload(req, res) {
     // Download using the stored path
     const { data, error } = await req.supabaseClient.storage
       .from("uploads")
-      .download(fileInfo.storagePath);
+      .download(fileInfo.unique_fname);
 
     if (error) {
       console.error("Error downloading file: ", error.message);
@@ -198,10 +184,10 @@ async function fileDownload(req, res) {
 
 async function fileShare(req, res) {
   try {
-    const { itemId: storagePath, email, permissions} = req.body;
+    const { itemId: uniqueFileName, email, permissions} = req.body;
 
     // Validate input
-    if (!storagePath || !email) {
+    if (!uniqueFileName || !email) {
       return res
         .status(400)
         .json({ error: "Missing required fields" });
@@ -225,7 +211,7 @@ async function fileShare(req, res) {
     const result = await shareFile(
       req.supabaseClient, 
       req.user.id, 
-      storagePath, 
+      uniqueFileName, 
       userData.id, 
       permissions, 
       false
