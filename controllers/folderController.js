@@ -156,7 +156,7 @@ async function deleteAllFiles(req, files, folderName) {
         const { error: fileError } = await req.supabaseClient
                                                 .from('File')
                                                 .delete()
-                                                .eq('id', file.id); 
+                                                .eq('storagePath', file.storagePath); 
         if (fileError) {
             console.log(fileError);
             throw fileError;
@@ -275,6 +275,13 @@ async function shareFolder(supabaseClient, folder, recipientId, currentUserId) {
             throw new Error("Missing required fields: folder.id and recipientId are required");
         }
 
+        if (currentUserId === recipientId) {
+            return {
+                success: false,
+                error: "You cannot share folders with yourself"
+            };
+        }
+
         // Check if folder is already shared with this user
         const { data: existingShare, error: checkError } = await supabaseClient
             .from('SharedFolders')
@@ -305,7 +312,7 @@ async function shareFolder(supabaseClient, folder, recipientId, currentUserId) {
                 shared_by: currentUserId, // Use the passed currentUserId
                 shared_with: recipientId,
                 permissions: 'view', // Default permission
-                share_parents: false // Default value
+                share_parents: true // Default value
             });
 
         if (shareError) {

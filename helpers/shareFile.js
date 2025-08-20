@@ -5,37 +5,25 @@ async function shareFile(supabaseClient, currentUserId, storagePath, recipientId
     if (!storagePath || !recipientId) {
       throw new Error("Missing required fields: storagePath and recipientId are required");
     }
-
-    // Check if file is already shared with this user
-    const { data: existingShare, error: checkError } = await supabaseClient
-      .from('SharedFiles')
-      .select('id')
-      .eq('file_path', storagePath)
-      .eq('shared_with', recipientId)
-      .single();
-
-    if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows found
-      console.error("Error checking existing share:", checkError);
-      throw new Error("Error checking existing shares");
-    }
-
-    if (existingShare) {
-      // This is NOT an error - just return success with info message
-      return { 
-        success: true, 
-        alreadyShared: true, 
-        message: "File is already shared with this user" 
+    
+    if (currentUserId === recipientId) {
+      return {
+        success: false,
+        error: "You cannot share files with yourself"
       };
     }
 
-    const { error: shareError } = await supabaseClient
+    // Use upsert to handle both insert and update cases
+    const { data, error: shareError } = await supabaseClient
       .from('SharedFiles')
-      .insert({
+      .upsert({
           file_path: storagePath,
           shared_by: currentUserId,
           shared_with: recipientId,
           permissions: permissions || 'view',
           share_parents: shareParents || false
+      }, {
+          onConflict: 'file_path,shared_with' // Specify the unique constraint columns
       });
 
     if (shareError) {

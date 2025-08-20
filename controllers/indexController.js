@@ -27,7 +27,8 @@ async function indexGet(req, res) {
     let parentFolders = [];
     
     const rootFolders = folders.filter((folder) => folder.parentid === null);
-    const allAccessibleFolders = [...folders, ...(sharedFolders || [])];
+    const sharedFolderObjs = (sharedFolders || []).map(r => r.Folder);
+    const allAccessibleFolders = [...folders, ...sharedFolderObjs];    
     
     if (folderid) {
         const { data: folderData, error: folderFetchError } = await req.supabaseClient
@@ -48,6 +49,9 @@ async function indexGet(req, res) {
         nestedFolders = rootFolders;
         parentFolders = [];
     }
+
+    console.log("All accessible folders: ", allAccessibleFolders);
+    console.log("parentFolders: ", parentFolders);
    
     res.render('indexView', { 
         headerTitle: "MyDrive", 
@@ -104,7 +108,7 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         const file = record.File;
         if (!file) return;
 
-        if (!record.shareParents) {
+        if (!record.share_parents) {
             // Files with shareParents always go to root
             rootPromotedFiles.push(record);
         } else {
@@ -127,6 +131,8 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
             record.File.folderid === folderid
         );
     }
+
+    console.log("FOLDERID: ", folderid)
     return { data: filteredFiles, error: null };
 }
 
@@ -162,7 +168,7 @@ async function getSharedFolders(supabaseClient, userId, folderid) {
         if (!folder) return;
         
         if (!record.share_parents) {
-            // Folders with share_parents always go to root
+            // Folders without share_parents always go to root
             rootPromotedFolders.push(record);
         } else {
             // Regular shared folders follow normal folder structure
@@ -185,7 +191,8 @@ async function getSharedFolders(supabaseClient, userId, folderid) {
             record.Folder.parentid === folderid
         );
     }
-    console.log("SHARED FOLDERS: ", filteredFolders);
+
+    console.log("FILTERED FOLDERS: ", filteredFolders);   
     return { data: filteredFolders, error: null };
 }
 
