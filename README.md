@@ -22,11 +22,11 @@ It’s a **mock cloud storage platform** — similar in spirit to Google Drive �
 ## 🔒 Security  
 
 MyDrive uses **Supabase Row Level Security (RLS)** to ensure that users can only access their own files and folders.  
-This is achieved by creating database policies that check the authenticated user's `auth.uid()` against the `owner_id` column in each table.
+This is achieved by creating database policies that check the authenticated user's `auth.uid()` against the `userid` column in each table.
 
 **Key points:**
 - Every file and folder record includes a `userid` field.
-- All read, write, update, and delete operations are restricted to the owner.
+- All read, write, update, and delete operations are restricted to the owner or users with share access.
 - Without a valid session or JWT, access is denied at the database level.
 - Even if an endpoint is exposed, RLS prevents unauthorized data access.
 
@@ -57,8 +57,10 @@ Over time, I migrated to **Supabase** for a more streamlined setup, combining au
 
 ### 1. Clone the repository  
 
+```bash
 git clone https://github.com/your-username/mydrive.git
 cd mydrive
+```
 
 ### 2. Install Dependencies & Configure Environment Variables
 
@@ -77,6 +79,6 @@ SUPABASE_URL="https://<YOUR_PROJECT_REF>.supabase.co"
 
 ### 3. Run localhost
 
+```bash
 node app.js
-
-## 🔒 Row Level Security (RLS)
+```
