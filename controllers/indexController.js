@@ -27,7 +27,7 @@ async function indexGet(req, res) {
     let parentFolders = [];
     
     const rootFolders = folders.filter((folder) => folder.parentid === null);
-    const sharedFolderObjs = (sharedFolders || []).map(r => r.Folder);
+    const sharedFolderObjs = (sharedFolders.sharedFolderRecords || []).map(r => r.Folder);
     const allAccessibleFolders = [...folders, ...sharedFolderObjs];    
     
     if (folderid) {
@@ -59,7 +59,7 @@ async function indexGet(req, res) {
         files: files, 
         sharedFiles: sharedFiles,
         nestedFolders: nestedFolders, 
-        sharedFolders: sharedFolders,
+        sharedFolders: sharedFolders.filteredFolders,
         user: req.user, 
         parentFolders: parentFolders
     });
@@ -193,7 +193,7 @@ async function getSharedFolders(supabaseClient, userId, folderid) {
     }
 
     console.log("FILTERED FOLDERS: ", filteredFolders);   
-    return { data: filteredFolders, error: null };
+    return { data: { sharedFolderRecords, filteredFolders }, error: null };
 }
 
 function buildParentPath(currentFolderId, allFolders) {
