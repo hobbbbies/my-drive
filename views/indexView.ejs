@@ -58,7 +58,7 @@
                         data-uniqueFileName="<%= file.unique_fname %>"
                         >
                             <div class="file-icon">📄</div>
-                            <div class="file-name"><%= file.name %></div>
+                            <div class="file-name"><%= file.name %><%= file.extension %></div>
                         </div>
                     <% }); %>
                 <% } %>
@@ -75,7 +75,7 @@
                         data-uniqueFileName="<%= sharedFile.File.unique_fname %>"
                         >
                             <div class="file-icon">📄</div>
-                            <div class="file-name"><%= sharedFile.File.name %></div>
+                            <div class="file-name"><%= sharedFile.File.name %><%= sharedFile.File.extension %></div>
                             <span class="shared-indicator">Shared by <%= sharedFile.User.email %></span>
                             
                         </div>
@@ -83,9 +83,15 @@
                 <% } %>
             </div>
             <% if ((!files || !files.length) && (!nestedFolders || !nestedFolders.length) ) { %>
-                <div class="empty-state">
-                    <p>No files yet. Start by uploading a file!</p>
-                </div>
+                <% if ((!sharedFiles || !sharedFiles.length) && (!sharedFolders || !sharedFolders.length)) { %>
+                    <div class="empty-state">
+                        <p>No files yet. Start by uploading a file!</p>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <p>Only the owner can edit shared files and folders</p>
+                    </div>
+                <% } %>
             <% } %>
         </div>
     </main>

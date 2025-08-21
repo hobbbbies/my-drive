@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Uploading...';
+
         const fileInput = form.querySelector('input[type="file"]');
         const file = fileInput.files[0];
         if (!file) return;
@@ -57,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
             method: form.method,
             body: formData
         });
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
 
         if (response.ok) {
             alert('Upload successful!\nSave this key to decrypt your file later:\n' + key);
