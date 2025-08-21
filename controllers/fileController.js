@@ -48,6 +48,7 @@ async function filePost(req, res) {
       unique_fname: uniqueFileName, 
       folderid: folder.id || null,
       userid: req.user.id,
+      iv: req.body.iv // already stringified from the body 
     });
 
     if (dbError) {
@@ -128,7 +129,7 @@ async function fileDownload(req, res) {
   try {
     const { data: fileInfo, error: fetchError } = await req.supabaseClient
       .from("File")
-      .select("name, extension, unique_fname")
+      .select("name, extension, unique_fname, iv")
       .eq("unique_fname", req.query.uniqueFileName)
       .single();
 
@@ -150,9 +151,10 @@ async function fileDownload(req, res) {
     
     const buffer = Buffer.from(await data.arrayBuffer());
     const filename = `${fileInfo.name}${fileInfo.extension}`;
-
+    
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("X-File-IV", fileInfo.iv); // Custom header for IV
     res.send(buffer);
   } catch (error) {
     console.error(error);
