@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Encrypt the file
         const { encrypted, iv, key } = await encryptFile(file);
-
+        localStorage.setItem("encryptionKey", key);
+        
         // Prepare FormData
         const formData = new FormData(form);
         formData.set('file', encrypted, file.name);

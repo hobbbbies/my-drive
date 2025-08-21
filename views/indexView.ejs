@@ -114,7 +114,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a id="download-link" class="modal-button primary" href="#">Download</a>
+                <button id="download-button" class="modal-button primary" onclick="downloadFromModal()">Download</button>
                 <button id="share-link" class="modal-button secondary" onclick="shareFromModal()" style="display: none;">Share</button>
                 <a id="delete-link" class="modal-button danger" href="#">Delete</a>
             </div>
@@ -127,5 +127,6 @@
     <!-- Include JavaScript files -->
     <script src="/js/shareModal.js"></script>
     <script src="/js/index.js"></script>
+    <script src="/js/decryptFile.js"></script>
 </body>
 </html>

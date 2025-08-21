@@ -1,37 +1,42 @@
 async function downloadFromFetch(uniqueFileName) {
-  const res = await fetch(`/download/?uniqueFileName=${uniqueFileName}`); 
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  try {
+    const res = await fetch(`/file/download/?uniqueFileName=${encodeURIComponent(uniqueFileName)}&shared=false`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    // Try to read filename from Content-Disposition
+    const cd = res.headers.get("Content-Disposition") || "";
+    const match = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i);
+    const filename = match ? decodeURIComponent(match[1]) : "download.bin";
 
-  // Try to read filename from Content-Disposition
-  const cd = res.headers.get("Content-Disposition") || "";
-  const match = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i);
-  const filename = match ? decodeURIComponent(match[1]) : "download.bin";
+    const blob = await res.blob(); // Will be encrypted
+    if (!blob) throw new Error("Failed to fetch blob");
 
-  const blob = await res.blob(); // Will be encrypted
-  if (!blob) throw new Error("Failed to fetch blob");
+    const ivHeader = res.headers.get("X-File-IV");
+    const ivArray = ivHeader ? JSON.parse(ivHeader) : null;
+    if (!ivArray) throw new Error("No IV found in response headers");
+    const key = await getKey(uniqueFileName);
 
-  const ivHeader = res.headers.get("X-File-IV");
-  const ivArray = ivHeader ? JSON.parse(ivHeader) : null;
-  if (!ivArray) throw new Error("No IV found in response headers");
-  const key = await getKey(uniqueFileName);
+    const decryptedBlob = await decryptFile(blob, key, ivArray);
+    if (!decryptedBlob) throw new Error("Decryption failed");
 
-  const decryptedBlob = await decryptFile(blob, key, ivArray);
-  if (!decryptedBlob) throw new Error("Decryption failed");
+    const href = URL.createObjectURL(decryptedBlob);
 
-  const href = URL.createObjectURL(decryptedBlob);
+    // Create a temporary <a> and click it
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;     // suggested name
+    document.body.appendChild(a); // some browsers need it in the DOM
+    a.click();
+    a.remove();
 
-  // Create a temporary <a> and click it
-  const a = document.createElement("a");
-  a.href = href;
-  a.download = filename;     // suggested name
-  document.body.appendChild(a); // some browsers need it in the DOM
-  a.click();
-  a.remove();
-
-  URL.revokeObjectURL(href); // cleanup
+    URL.revokeObjectURL(href); // cleanup
+  } catch (error) {
+    console.error("Failed to fetch file:", error);
+    throw error;
+  }
 }
 
 async function decryptFile(encryptedBlob, keyBase64, ivArray) {
+    
     const keyBuffer = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
     const iv = new Uint8Array(ivArray);
 

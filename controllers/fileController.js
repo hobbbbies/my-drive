@@ -108,7 +108,7 @@ async function fileDelete(req, res) {
       const { error: removeShareError } = await req.supabaseClient
         .from("SharedFiles")
         .delete()
-        .eq("file_path", req.query.unique_fname)
+        .eq("file_name", req.query.uniqueFileName)
         .eq("shared_with", req.user.id);
 
       if (removeShareError) {

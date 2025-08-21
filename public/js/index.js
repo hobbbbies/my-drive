@@ -4,7 +4,7 @@ const modalTitle = document.getElementById("modal-title");
 const modalSize = document.getElementById("modal-size");
 const modalExt = document.getElementById("modal-ext");
 const modalAdded = document.getElementById("modal-added");
-const downloadLink = document.getElementById("download-link");
+const downloadButton = document.getElementById("download-button");
 const deleteLink = document.getElementById("delete-link");
 const shareButton = document.getElementById("share-link"); // Add this line
 const fileItems = document.querySelectorAll(".file-item");
@@ -48,8 +48,7 @@ fileItems.forEach((item) => {
         modalExt.textContent = fileExt || "--";
         modalAdded.textContent = trimmedAdded || "--";
 
-        // Set download link
-        downloadLink.setAttribute("href", `/file/download/?uniqueFileName=${encodeURIComponent(uniqueFileName)}`);
+        // Set delete link
         deleteLink.setAttribute("href", `/file/delete/?uniqueFileName=${encodeURIComponent(uniqueFileName)}&shared=${!!isSharedFile}`);
 
         // Show the modal
@@ -82,6 +81,17 @@ function shareFromModal() {
     }
 }
 
+async function downloadFromModal() {
+    const uniqueFileName = currentFileForSharing.pathOrId;
+    if (uniqueFileName) {
+        try {
+            await downloadFromFetch(uniqueFileName);
+        } catch (error) {
+            console.error("Failed to download file:", error);
+        }
+    }
+} 
+
 // Delete folder function
 function deleteFolder(folderId, shared=false) {
     if (confirm('Are you sure you want to delete this folder? This action cannot be undone.')) {
@@ -92,3 +102,4 @@ function deleteFolder(folderId, shared=false) {
 // Make functions available globally for onclick handlers
 window.shareFromModal = shareFromModal;
 window.deleteFolder = deleteFolder;
+window.downloadFromModal = downloadFromModal;
