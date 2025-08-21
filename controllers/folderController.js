@@ -161,7 +161,7 @@ async function deleteFoldersRecursively(req, folders) {
 async function deleteAllFiles(req, files, folderName) {
     for (const file of files) {
         try {
-            await fileDelete(req.supabaseClient, file.unique_fname, req.user.id);
+            await deleteFile(req.supabaseClient, file.unique_fname, req.user.id);
         } catch (error) {
             console.log(error);
             throw error;

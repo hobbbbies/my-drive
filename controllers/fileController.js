@@ -126,7 +126,6 @@ async function fileDelete(req, res) {
 
 async function fileDownload(req, res) {
   try {
-    // Get file info from database first
     const { data: fileInfo, error: fetchError } = await req.supabaseClient
       .from("File")
       .select("name, extension, unique_fname")
@@ -138,16 +137,17 @@ async function fileDownload(req, res) {
       return res.status(404).send("File not found");
     }
 
-    // Download using the stored path
     const { data, error } = await req.supabaseClient.storage
       .from("uploads")
       .download(fileInfo.unique_fname);
+
+    
 
     if (error) {
       console.error("Error downloading file: ", error.message);
       return res.status(500).send("Error downloading file from storage");
     }
-
+    
     const buffer = Buffer.from(await data.arrayBuffer());
     const filename = `${fileInfo.name}${fileInfo.extension}`;
 
