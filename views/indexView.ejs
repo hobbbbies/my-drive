@@ -73,6 +73,7 @@
                         data-added="<%= sharedFile.File.createdAt %>"
                         data-folderid="<%= sharedFile.File.folderid %>"
                         data-uniqueFileName="<%= sharedFile.File.unique_fname %>"
+                        data-encrypted="<%= sharedFile.File.iv ? true : false %>"
                         >
                             <div class="file-icon">📄</div>
                             <div class="file-name"><%= sharedFile.File.name %><%= sharedFile.File.extension %></div>
@@ -120,9 +121,18 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="download-button" class="modal-button primary" onclick="downloadFromModal()">Download</button>
-                <button id="share-link" class="modal-button secondary" onclick="shareFromModal()" style="display: none;">Share</button>
-                <a id="delete-link" class="modal-button danger" href="#">Delete</a>
+                <div class="button-section">
+                    <button id="download-button" class="modal-button primary" onclick="downloadFromModal()">Download</button>
+                    <button id="share-link" class="modal-button secondary" onclick="shareFromModal()" style="display: none;">Share</button>
+                    <a id="delete-link" class="modal-button danger" href="#">Delete</a>
+                </div>
+                <div class="modal-encryption">
+                    <form>
+                        <label for="encryptionKeyInput">Encryption Key:</label>
+                        <input name="encryptionKey" id="encryptionKeyInput" value="" type="text"/>
+                    </form>
+                    <small class="modal-encryption-note">This file is encrypted. Enter your key to decrypt the file</small>
+                </div>
             </div>
         </div>
     </div>
@@ -131,8 +141,9 @@
     <%- include('partials/shareModal') %>
     
     <!-- Include JavaScript files -->
+    <script type="module" src="/js/importKey.js"></script>
     <script src="/js/shareModal.js"></script>
-    <script src="/js/index.js"></script>
-    <script src="/js/decryptFile.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <script type="module" src="/js/decryptFile.js"></script>
 </body>
 </html>

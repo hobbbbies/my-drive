@@ -1,7 +1,23 @@
 const fs = require('fs');
 require('dotenv').config();
 
+async function keysGet(req, res) {
+    try {
+        const { data: folders, error: folderError } = await req.supabaseClient.from('Folder').select().eq('userid', req.user.id);
+        res.render('keyView', { folders, user: req.user });
+        if (folderError) {
+            console.error("Error fetching folders:", folderError);
+            return res.status(500).send("Error fetching folders");
+        }
+    } catch (error) {
+        console.error("Error fetching folders:", error);
+        return res.status(500).send("Error fetching folders");
+    }
+}
+
+
 async function indexGet(req, res) {
+    // get users own folders
     const { data: folders, error: folderError } = await req.supabaseClient.from('Folder').select().eq('userid', req.user.id);
     const folderid = req.params.folderid || null;
     
@@ -205,4 +221,4 @@ function buildParentPath(currentFolderId, allFolders) {
     return path;
 }
 
-module.exports = { indexGet };
+module.exports = { indexGet, keysGet };

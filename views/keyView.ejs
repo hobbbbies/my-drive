@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - MyDrive</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%- include('./partials/sidebar', { headerTitle: "Current Keys", folders: folders || []}) %>
+    <main class="content">
+        <div class="content-header">
+            <%- include('./partials/header', { headerTitle: "Current Keys", user: user || {} }) %>
+        </div>
+        
+        <div class="form-container">
+            <div class="notice warning" style="margin-bottom: 1em; color: #b85c00; background: #fffbe6; padding: 0.75em 1em; border-radius: 4px;">
+                <strong>Notice:</strong> Your encryption keys are stored in the browser cache and are not permanent. Please copy and save them securely if you want to access your files later.
+            </div>
+            <div id="encryption-key"></div>
+            <button id="copy-key-btn" type="button" class="auth-button" style="display:none;">Copy Key</button>
+        </div>
+    </main>
+    <script src="/js/getKeys.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyBtn = document.getElementById('copy-key-btn');
+        const keyDiv = document.getElementById('encryption-key');
+        // Show button only if there is a key
+        if (keyDiv.textContent.trim()) {
+            copyBtn.style.display = '';
+        } else {
+            copyBtn.style.display = 'none';
+        }
+        copyBtn.addEventListener('click', async function() {
+            const key = keyDiv.textContent.trim();
+            if (key) {
+                await navigator.clipboard.writeText(key);
+                copyBtn.textContent = "Copied!";
+                setTimeout(() => copyBtn.textContent = "Copy Key", 2000);
+            }
+        });
+    });
+    </script>
+</body>
+</html>

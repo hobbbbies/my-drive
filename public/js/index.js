@@ -1,3 +1,5 @@
+import downloadFromFetch from './decryptFile.js';
+
 // File details modal functionality
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modal-title");
@@ -27,6 +29,7 @@ fileItems.forEach((item) => {
         const fileExt = item.getAttribute("data-ext");
         const fileAdded = item.getAttribute("data-added");
         const folderid = item.getAttribute("data-folderid");
+        const fileEncrypted = item.getAttribute("data-encrypted") === 'true';
         
         // Check if this is a shared file
         const isSharedFile = item.classList.contains('shared-file');

@@ -34,7 +34,18 @@
                         <% }); %>
                     </select>
                 </div>
-                
+                <div class="form-group">
+                    <label for="use-encryption">
+                        <input type="checkbox" id="use-encryption" name="useEncryption" checked />
+                        Encrypt file before upload
+                    </label>
+                </div>
+                <div class="form-group" id="encryption-key-group" style="display: block;">
+                    <label for="encryption-key">Encryption Key (leave blank to auto-generate):</label>
+                    <input type="text" id="encryption-key" autocomplete="off" />
+                    <!-- no name attribute so it wont reach the backend ever -->
+                </div>
+                <div id="key-info"></div>
                 <div class="form-actions">
                     <button type="submit" class="auth-button">Upload File</button>
                     <a href="/" class="btn-secondary">Cancel</a>
@@ -43,6 +54,6 @@
         </div>
     </main>
 
-    <script src="/js/encryptFile.js"></script>
+    <script type="module" src="/js/encryptFile.js"></script>
 </body>
 </html>

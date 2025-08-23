@@ -6,5 +6,7 @@ const attachClient = require('../middleware/attachClient');
 
 router.get("/", userAuth, attachClient, controller.indexGet);
 
+router.get("/keys", userAuth, attachClient, controller.keysGet);
+
 router.get("/root/:folderid", userAuth, attachClient, controller.indexGet);
 module.exports = router;

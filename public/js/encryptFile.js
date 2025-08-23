@@ -1,4 +1,4 @@
-
+import importKey from './importKey.js';
 
 // Generate a random AES-GCM key
 async function generateKey() {
@@ -48,10 +48,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = fileInput.files[0];
         if (!file) return;
 
-        // Encrypt the file
-        const { encrypted, iv, key } = await encryptFile(file);
-        localStorage.setItem("encryptionKey", key);
+        const userKey = document.getElementById('encryption-key').value;
+        const keyInfoDiv = document.getElementById('key-info');
         
+        if (!userKey) { // NEED TO CHECK IF VALID FORMAT TOO
+            // if no key, go standard procedure, otherwise use key 
+            try {
+                var { encrypted, iv, key } = await encryptFile(file);
+            } catch (error) {
+                console.error("Encryption failed:", error);
+                alert("Encryption failed. Key may not be valid base64 format.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                return;
+            }
+            localStorage.setItem("encryptionKey", key);
+            keyInfoDiv.style.display = 'block';
+            keyInfoDiv.textContent = 'Encryption Key: ' + key;
+        } else {
+            const cryptoKey = await importKey(userKey);
+            // Use the provided key
+            var { encrypted, iv } = await encryptFile(file, cryptoKey);
+        }
         // Prepare FormData
         const formData = new FormData(form);
         formData.set('file', encrypted, file.name);
@@ -75,3 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const useEncryption = document.getElementById('use-encryption');
+    const keyGroup = document.getElementById('encryption-key-group');
+    useEncryption.addEventListener('change', function() {
+        keyGroup.style.display = this.checked ? 'block' : 'none';
+    });
+});

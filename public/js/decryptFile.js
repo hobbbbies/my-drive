@@ -1,4 +1,6 @@
-async function downloadFromFetch(uniqueFileName) {
+import importKey from "./importKey.js";
+
+export default async function downloadFromFetch(uniqueFileName) {
   try {
     const res = await fetch(`/file/download/?uniqueFileName=${encodeURIComponent(uniqueFileName)}&shared=false`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -36,13 +38,11 @@ async function downloadFromFetch(uniqueFileName) {
 }
 
 async function decryptFile(encryptedBlob, keyBase64, ivArray) {
-    
-    const keyBuffer = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
+    const key = await importKey(keyBase64);
+    if (!key) throw new Error("Failed to import decryption key");
+
     const iv = new Uint8Array(ivArray);
 
-    const key = await window.crypto.subtle.importKey(
-        "raw", keyBuffer, { name: "AES-GCM" }, false, ["decrypt"]
-    );
 
     const encryptedArrayBuffer = await encryptedBlob.arrayBuffer();
     
@@ -65,3 +65,4 @@ async function getKey() {
 
   return keyBase64;
 }
+

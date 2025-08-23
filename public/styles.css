@@ -338,7 +338,7 @@ body {
 .modal-content {
   background-color: var(--color-background);
   margin: 10% auto;
-  width: 450px;
+  width: clamp(400px, 50%, 600px);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   overflow: hidden;
@@ -404,17 +404,21 @@ body {
     padding: 16px 24px;
     border-top: 1px solid var(--color-border);
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
     gap: 12px;
+    align-items: flex-end;
 }
 
 .modal-button {
+    flex: 1;
+    gap: 16px;
     padding: 8px 16px;
     border-radius: 4px;
     font-weight: 500;
     text-decoration: none;
     cursor: pointer;
     transition: background-color 0.2s;
+    max-width: 100px;
 }
 
 .modal-button.primary {
@@ -592,7 +596,7 @@ body {
 }
 
 .file-input-container input[type="file"] {
-    padding: 10px 0;
+    padding: 10px 10px;
     width: 100%;
 }
 
@@ -851,4 +855,16 @@ body {
 
 .file-item.shared-file:hover, .shared-indicator {
     opacity: 0.7;
+}
+
+.button-section {
+    flex: 1;
+    display: flex;
+    gap: 12px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
