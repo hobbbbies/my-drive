@@ -48,48 +48,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = fileInput.files[0];
         if (!file) return;
 
-        const userKey = document.getElementById('encryption-key').value;
-        const keyInfoDiv = document.getElementById('key-info');
-        
-        if (!userKey) { // NEED TO CHECK IF VALID FORMAT TOO
-            // if no key, go standard procedure, otherwise use key 
-            try {
-                var { encrypted, iv, key } = await encryptFile(file);
-            } catch (error) {
-                console.error("Encryption failed:", error);
-                alert("Encryption failed. Key may not be valid base64 format.");
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-                return;
+        const useEncryption = document.getElementById('use-encryption').checked;
+        if (!useEncryption) {
+            form.submit();
+        } else {
+            const userKey = document.getElementById('encryption-key').value;
+            const keyInfoDiv = document.getElementById('key-info');
+            
+            if (!userKey) { // NEED TO CHECK IF VALID FORMAT TOO
+                // if no key, go standard procedure, otherwise use key 
+                try {
+                    var { encrypted, iv, key } = await encryptFile(file);
+                } catch (error) {
+                    console.error("Encryption failed:", error);
+                    alert("Encryption failed. Key may not be valid base64 format.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    return;
+                }
+                localStorage.setItem("encryptionKey", key);
+                keyInfoDiv.style.display = 'block';
+                keyInfoDiv.textContent = 'Encryption Key: ' + key;
+            } else {
+                const cryptoKey = await importKey(userKey);
+                // Use the provided key
+                var { encrypted, iv } = await encryptFile(file, cryptoKey);
             }
-            localStorage.setItem("encryptionKey", key);
-            keyInfoDiv.style.display = 'block';
-            keyInfoDiv.textContent = 'Encryption Key: ' + key;
-        } else {
-            const cryptoKey = await importKey(userKey);
-            // Use the provided key
-            var { encrypted, iv } = await encryptFile(file, cryptoKey);
-        }
-        // Prepare FormData
-        const formData = new FormData(form);
-        formData.set('file', encrypted, file.name);
-        formData.append('iv', JSON.stringify(iv));
+            // Prepare FormData
+            const formData = new FormData(form);
+            formData.set('file', encrypted, file.name);
+            formData.append('iv', JSON.stringify(iv));
 
-        // Submit via fetch
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: formData
-        });
+            // Submit via fetch
+            const response = await fetch(form.action, {
+                method: form.method,
+                body: formData
+            });
 
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
 
-        if (response.ok) {
-            alert('Upload successful!\nSave this key to decrypt your file later:\n' + key);
-            window.location.href = '/';
-        } else {
-            alert('Upload failed.');
-        }
+            if (response.ok) {
+                window.location.href = '/';
+            } else {
+                alert('Upload failed.');
+            }
+    }
     });
 });
 

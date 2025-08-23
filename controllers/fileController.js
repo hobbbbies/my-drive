@@ -140,9 +140,7 @@ async function fileDownload(req, res) {
 
     const { data, error } = await req.supabaseClient.storage
       .from("uploads")
-      .download(fileInfo.unique_fname);
-
-    
+      .download(fileInfo.unique_fname);    
 
     if (error) {
       console.error("Error downloading file: ", error.message);

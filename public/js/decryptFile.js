@@ -14,13 +14,16 @@ export default async function downloadFromFetch(uniqueFileName) {
 
     const ivHeader = res.headers.get("X-File-IV");
     const ivArray = ivHeader ? JSON.parse(ivHeader) : null;
-    if (!ivArray) throw new Error("No IV found in response headers");
-    const key = await getKey(uniqueFileName);
-
-    const decryptedBlob = await decryptFile(blob, key, ivArray);
-    if (!decryptedBlob) throw new Error("Decryption failed");
-
-    const href = URL.createObjectURL(decryptedBlob);
+    let href;
+    if (!ivArray) {
+      // Not encrypted, just download
+      href = URL.createObjectURL(blob);
+    } else {
+      const key = await getKey(uniqueFileName);
+      const decryptedBlob = await decryptFile(blob, key, ivArray);
+      if (!decryptedBlob) throw new Error("Decryption failed");
+      href = URL.createObjectURL(decryptedBlob);
+    }
 
     // Create a temporary <a> and click it
     const a = document.createElement("a");
