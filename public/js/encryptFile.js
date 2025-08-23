@@ -100,7 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', function() {
     const useEncryption = document.getElementById('use-encryption');
     const keyGroup = document.getElementById('encryption-key-group');
+    const encryptionWarning = document.getElementById('encryption-warning');
+    
     useEncryption.addEventListener('change', function() {
         keyGroup.style.display = this.checked ? 'block' : 'none';
+        encryptionWarning.style.display = this.checked ? 'block' : 'none';
     });
 });

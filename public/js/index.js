@@ -45,12 +45,10 @@ fileItems.forEach((item) => {
         // Handle share button visibility and functionality
         if (isSharedFile) {
             shareButton.style.display = 'none'; 
-            currentFileForSharing = { pathOrId: null, name: null };
         } else {
             shareButton.style.display = 'inline-block';
-            currentFileForSharing = { pathOrId: uniqueFileName, name: fileName };
         }
-        
+        currentFileForSharing = { pathOrId: uniqueFileName, name: fileName };
         const trimmedAdded = new Date(fileAdded).toLocaleDateString();
         
         // Update modal content
@@ -95,6 +93,7 @@ function shareFromModal() {
 }
 
 async function downloadFromModal() {
+    console.log("Downloading file:", currentFileForSharing);
     const uniqueFileName = currentFileForSharing.pathOrId;
     if (uniqueFileName) {
         try {
