@@ -20,10 +20,7 @@ let currentFileForSharing = { pathOrId: null, name: null };
 
 // File item click handlers
 fileItems.forEach((item) => {
-    item.onclick = (e) => {
-        // Don't open modal if clicking on share button
-        if (e.target.closest('.share-file')) return;
-        
+    item.onclick = (e) => {        
         // Get file metadata from data attributes
         const fileName = item.getAttribute("data-filename");
         const uniqueFileName = item.getAttribute("data-uniqueFileName");
@@ -33,14 +30,18 @@ fileItems.forEach((item) => {
         const fileAdded = item.getAttribute("data-added");
         const folderid = item.getAttribute("data-folderid");
         const fileEncrypted = item.getAttribute("data-encrypted") === 'true';
-        
+        console.log("fileEncrypted: ", fileEncrypted);
+
         // Check if this is a shared file
         const isSharedFile = item.classList.contains('shared-file');
         
         if (!fileEncrypted) {
             encryptionNote.innerHTML = "This file is <strong><i>not encrypted</i></strong>. No key required."
             encryptionKeyForm.style.display = 'none';
-        } 
+        } else {
+            encryptionNote.innerHTML = "This file is <strong><i>encrypted</i></strong>. Enter your key to decrypt the file."
+            encryptionKeyForm.style.display = 'block';
+        }
 
         // Handle share button visibility and functionality
         if (isSharedFile) {
