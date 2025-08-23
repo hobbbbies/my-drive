@@ -88,9 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = false;
             submitBtn.textContent = originalText;
 
-            if (response.ok) {
-                window.location.href = '/';
-            } else {
+            if (!response.ok) {
                 alert('Upload failed.');
             }
     }
@@ -101,9 +99,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const useEncryption = document.getElementById('use-encryption');
     const keyGroup = document.getElementById('encryption-key-group');
     const encryptionWarning = document.getElementById('encryption-warning');
-    
+    const copyBtn = document.getElementById('copy-key-btn');
+    const encryptionKeyInput = document.getElementById('encryption-key');
+
     useEncryption.addEventListener('change', function() {
         keyGroup.style.display = this.checked ? 'block' : 'none';
         encryptionWarning.style.display = this.checked ? 'block' : 'none';
+    });
+
+    const keyInfoDiv = document.getElementById('key-info');
+
+    // Show button only if key-info div has content
+    copyBtn.style.display = keyInfoDiv.textContent.trim() !== "" ? 'block' : 'none';
+
+    copyBtn.addEventListener('click', async function() {
+        const key = keyInfoDiv.textContent.trim();
+        if (key) {
+            await navigator.clipboard.writeText(key);
+            copyBtn.textContent = "Copied!";
+            setTimeout(() => copyBtn.textContent = "Copy Key", 2000);
+        }
     });
 });

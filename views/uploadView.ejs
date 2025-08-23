@@ -43,12 +43,13 @@
                 <div class="form-group" id="encryption-key-group" style="display: block;">
                     <label for="encryption-key">Encryption Key (leave blank to auto-generate):</label>
                     <input type="text" id="encryption-key" autocomplete="off" />
-                    <!-- no name attribute so it wont reach the backend ever -->
+                    <!-- no name attribute so it won't reach the backend ever -->
                 </div>
                 <div id="encryption-warning" class="notice warning" style="display: none; margin-bottom: 1em; color: #b85c00; background: #fffbe6; padding: 0.75em 1em; border-radius: 4px;">
                     <strong>Warning:</strong> Encrypted files can only be accessed using the provided encryption key. If you lose the key, you will permanently lose access to the file.
                 </div>
                 <div id="key-info"></div>
+                <button id="copy-key-btn" type="button" class="auth-button" style="display:none;">Copy Key</button>
                 <div class="form-actions">
                     <button type="submit" class="auth-button">Upload File</button>
                     <a href="/" class="btn-secondary">Cancel</a>

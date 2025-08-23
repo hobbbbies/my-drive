@@ -60,7 +60,7 @@ async function filePost(req, res) {
       return res.status(400).send("Error saving file information");
     }
 
-    res.redirect("/");
+    res.status(200).json({ message: "File uploaded successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).send("Something went wrong with file upload");
