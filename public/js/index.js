@@ -12,7 +12,6 @@ const shareButton = document.getElementById("share-link"); // Add this line
 const fileItems = document.querySelectorAll(".file-item");
 const closeBtn = document.querySelector(".close");
 const encryptionKeyForm = document.getElementById("encryption-key-form");
-const encryptionInput = document.querySelector("encryption-key-input");
 const encryptionNote = document.querySelector(".modal-encryption-note");
 
 // Store current file info for sharing
@@ -72,12 +71,14 @@ fileItems.forEach((item) => {
 closeBtn.onclick = (e) => {
     e.preventDefault();
     modal.style.display = "none";
+    document.getElementById('download-error').textContent = '';
 };
 
 // Close modal when clicking outside the content
 window.onclick = (event) => {
     if (event.target === modal) {
         modal.style.display = "none";
+        document.getElementById('download-error').textContent = '';
     }
 };
 

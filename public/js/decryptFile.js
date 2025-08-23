@@ -26,7 +26,6 @@ export default async function downloadFromFetch(uniqueFileName) {
         if (!decryptedBlob) throw new Error("Invalid or missing decryption key");
       } catch (error) {
         setDownloadError(error.message);
-        console.error("Decryption failed:", error);
         return;
       }
       href = URL.createObjectURL(decryptedBlob);
@@ -65,13 +64,12 @@ async function decryptFile(encryptedBlob, keyBase64, ivArray) {
         );
         return new Blob([decryptedBuffer]);
     } catch (error) {
-        console.error("Decryption failed:", error);
-        throw new Error("Decryption failed");
+      throw new Error("Decryption failed");
     }
 }
 
 async function getKey() {
-  const keyBase64 = localStorage.getItem("encryptionKey"); // But each file will have its own key
+  const keyBase64 = document.getElementById("encryption-key-input").value;
   if (!keyBase64) throw new Error("No encryption key found");
 
   return keyBase64;
