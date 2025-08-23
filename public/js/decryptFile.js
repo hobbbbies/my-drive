@@ -19,9 +19,16 @@ export default async function downloadFromFetch(uniqueFileName) {
       // Not encrypted, just download
       href = URL.createObjectURL(blob);
     } else {
-      const key = await getKey(uniqueFileName);
-      const decryptedBlob = await decryptFile(blob, key, ivArray);
-      if (!decryptedBlob) throw new Error("Decryption failed");
+      let decryptedBlob;
+      try {
+        const key = await getKey(uniqueFileName);
+        decryptedBlob = await decryptFile(blob, key, ivArray);
+        if (!decryptedBlob) throw new Error("Invalid or missing decryption key");
+      } catch (error) {
+        setDownloadError(error.message);
+        console.error("Decryption failed:", error);
+        return;
+      }
       href = URL.createObjectURL(decryptedBlob);
     }
 
@@ -35,6 +42,7 @@ export default async function downloadFromFetch(uniqueFileName) {
 
     URL.revokeObjectURL(href); // cleanup
   } catch (error) {
+    setDownloadError(error.message);
     console.error("Failed to fetch file:", error);
     throw error;
   }
@@ -67,5 +75,20 @@ async function getKey() {
   if (!keyBase64) throw new Error("No encryption key found");
 
   return keyBase64;
+}
+
+// Add this helper function at the bottom of the file
+function setDownloadError(message) {
+  let errorElem = document.getElementById('download-error');
+  if (!errorElem) {
+    errorElem = document.createElement('div');
+    errorElem.id = 'download-error';
+    errorElem.style.color = 'red';
+    errorElem.style.margin = '1em 0';
+    // Try to insert near modal or at top of body
+    const modal = document.querySelector('.modal') || document.body;
+    modal.prepend(errorElem);
+  }
+  errorElem.textContent = message;
 }
 
