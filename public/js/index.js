@@ -11,6 +11,9 @@ const deleteLink = document.getElementById("delete-link");
 const shareButton = document.getElementById("share-link"); // Add this line
 const fileItems = document.querySelectorAll(".file-item");
 const closeBtn = document.querySelector(".close");
+const encryptionKeyForm = document.getElementById("encryption-key-form");
+const encryptionInput = document.querySelector("encryption-key-input");
+const encryptionNote = document.querySelector(".modal-encryption-note");
 
 // Store current file info for sharing
 let currentFileForSharing = { pathOrId: null, name: null };
@@ -34,6 +37,11 @@ fileItems.forEach((item) => {
         // Check if this is a shared file
         const isSharedFile = item.classList.contains('shared-file');
         
+        if (!fileEncrypted) {
+            encryptionNote.innerHTML = "This file is <strong><i>not encrypted</i></strong>. No key required."
+            encryptionKeyForm.style.display = 'none';
+        } 
+
         // Handle share button visibility and functionality
         if (isSharedFile) {
             shareButton.style.display = 'none'; 
