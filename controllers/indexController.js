@@ -23,7 +23,7 @@ async function indexGet(req, res) {
     
     // Get user's own files
     const { data: files, error: fileError } = await getUserFiles(req.supabaseClient, req.user.id, folderid);
-    
+
     // Get shared files
     const { data: sharedFiles, error: sharedFileError } = await getSharedFiles(req.supabaseClient, req.user.id, folderid);
     

@@ -868,3 +868,9 @@ body {
     gap: 12px;
     flex-wrap: wrap;
 }
+
+.modal-encryption {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
