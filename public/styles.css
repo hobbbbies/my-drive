@@ -874,3 +874,12 @@ body {
     flex-direction: column;
     align-items: flex-end;
 }
+
+#copy-key-btn {
+    cursor: pointer;
+}
+
+.key-container {
+    display: flex;
+    justify-content: space-between;
+}

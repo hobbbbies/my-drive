@@ -111,8 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const key = keyInfoDiv.textContent.trim();
         if (key) {
             await navigator.clipboard.writeText(key);
-            copyBtn.textContent = "Copied!";
-            setTimeout(() => copyBtn.textContent = "Copy Key", 2000);
         }
     });
 });
