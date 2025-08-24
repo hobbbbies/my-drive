@@ -17,13 +17,13 @@ async function shareFile(supabaseClient, currentUserId, storagePath, recipientId
     const { data, error: shareError } = await supabaseClient
       .from('SharedFiles')
       .upsert({
-          file_path: storagePath,
+          file_name: storagePath,
           shared_by: currentUserId,
           shared_with: recipientId,
           permissions: permissions || 'view',
           share_parents: shareParents || false
       }, {
-          onConflict: 'file_path,shared_with' // Specify the unique constraint columns
+          onConflict: 'file_name,shared_with' // Specify the unique constraint columns
       });
 
     if (shareError) {

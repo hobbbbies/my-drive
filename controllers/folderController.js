@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { fileDelete } = require("./indexController");
+const deleteFile = require("../helpers/deleteFile");
 const shareFile = require('../helpers/shareFile');
 
 async function folderPost (req, res) {
@@ -160,22 +160,11 @@ async function deleteFoldersRecursively(req, folders) {
 
 async function deleteAllFiles(req, files, folderName) {
     for (const file of files) {
-        const { error: fileError } = await req.supabaseClient
-                                                .from('File')
-                                                .delete()
-                                                .eq('storagePath', file.storagePath); 
-        if (fileError) {
-            console.log(fileError);
-            throw fileError;
-        }
-
-        const { error: storageError } = await req.supabaseClient
-                                                .storage
-                                                .from('uploads')
-                                                .remove([`${folderName}/${file.id}`])    
-        if (storageError) {
-            console.log(storageError);
-            throw new Error(storageError.message || "Error removing file from storage");  // Added error message
+        try {
+            await deleteFile(req.supabaseClient, file.unique_fname, req.user.id);
+        } catch (error) {
+            console.log(error);
+            throw error;
         }
     }
 }
@@ -349,7 +338,7 @@ async function shareAllFiles(req, files, recipientId) {
             const result = await shareFile(
                 req.supabaseClient,
                 req.user.id,
-                file.storagePath,
+                file.unique_fname,
                 recipientId, // Use recipientId directly
                 'view',
                 true   
@@ -393,7 +382,7 @@ async function unshareFoldersRecursively(req, folders, userId) {
             await req.supabaseClient
                 .from("SharedFiles")
                 .delete()
-                .eq("file_path", file.storagePath)
+                .eq("file_name", file.unique_fname)
                 .eq("shared_with", userId);
         }
 

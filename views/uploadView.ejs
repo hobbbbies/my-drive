@@ -34,7 +34,26 @@
                         <% }); %>
                     </select>
                 </div>
-                
+                <div class="form-group">
+                    <label for="use-encryption">
+                        <input type="checkbox" id="use-encryption" name="useEncryption" />
+                        Encrypt file before upload
+                    </label>
+                </div>
+                <div class="form-group" id="encryption-key-group" style="display: block;">
+                    <label for="encryption-key">Encryption Key (leave blank to auto-generate):</label>
+                    <input type="text" id="encryption-key" autocomplete="off" />
+                    <!-- no name attribute so it won't reach the backend ever -->
+                </div>
+                <div id="encryption-warning" class="notice warning" style="display: none; margin-bottom: 1em; color: #b85c00; background: #fffbe6; padding: 0.75em 1em; border-radius: 4px;">
+                    <strong>Warning:</strong> Encrypted files can only be accessed using the provided encryption key. If you lose the key, you will permanently lose access to the file.
+                </div>
+                <div class="key-container">
+                    <div id="key-info"></div>
+                    <svg class="copy-btn" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16" style="display: none;">
+                        <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                    </svg>
+                </div>  
                 <div class="form-actions">
                     <button type="submit" class="auth-button">Upload File</button>
                     <a href="/" class="btn-secondary">Cancel</a>
@@ -42,5 +61,7 @@
             </form>
         </div>
     </main>
+
+    <script type="module" src="/js/encryptFile.js"></script>
 </body>
 </html>

@@ -55,10 +55,11 @@
                         data-ext="<%= file.extension %>"
                         data-added="<%= file.createdAt %>"
                         data-folderid="<%= file.folderid %>"
-                        data-storagePath="<%= file.storagePath %>"
+                        data-uniqueFileName="<%= file.unique_fname %>"
+                        data-encrypted="<%= file.iv ? true : false %>"
                         >
                             <div class="file-icon">📄</div>
-                            <div class="file-name"><%= file.name %></div>
+                            <div class="file-name"><%= file.name %><%= file.extension %></div>
                         </div>
                     <% }); %>
                 <% } %>
@@ -72,10 +73,11 @@
                         data-ext="<%= sharedFile.File.extension %>"
                         data-added="<%= sharedFile.File.createdAt %>"
                         data-folderid="<%= sharedFile.File.folderid %>"
-                        data-storagePath="<%= sharedFile.File.storagePath %>"
+                        data-uniqueFileName="<%= sharedFile.File.unique_fname %>"
+                        data-encrypted="<%= sharedFile.File.iv ? true : false %>"
                         >
                             <div class="file-icon">📄</div>
-                            <div class="file-name"><%= sharedFile.File.name %></div>
+                            <div class="file-name"><%= sharedFile.File.name %><%= sharedFile.File.extension %></div>
                             <span class="shared-indicator">Shared by <%= sharedFile.User.email %></span>
                             
                         </div>
@@ -83,9 +85,15 @@
                 <% } %>
             </div>
             <% if ((!files || !files.length) && (!nestedFolders || !nestedFolders.length) ) { %>
-                <div class="empty-state">
-                    <p>No files yet. Start by uploading a file!</p>
-                </div>
+                <% if ((!sharedFiles || !sharedFiles.length) && (!sharedFolders || !sharedFolders.length)) { %>
+                    <div class="empty-state">
+                        <p>No files yet. Start by uploading a file!</p>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <p>Only the owner can edit shared files and folders</p>
+                    </div>
+                <% } %>
             <% } %>
         </div>
     </main>
@@ -114,9 +122,19 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <a id="download-link" class="modal-button primary" href="#">Download</a>
-                <button id="share-link" class="modal-button secondary" onclick="shareFromModal()" style="display: none;">Share</button>
-                <a id="delete-link" class="modal-button danger" href="#">Delete</a>
+                <div class="button-section">
+                    <button id="download-button" class="modal-button primary" onclick="downloadFromModal()">Download</button>
+                    <button id="share-link" class="modal-button secondary" onclick="shareFromModal()" style="display: none;">Share</button>
+                    <a id="delete-link" class="modal-button danger" href="#">Delete</a>
+                </div>
+                <div class="modal-encryption">
+                    <form id="encryption-key-form">
+                        <label for="encryption-key-input">Encryption Key:</label>
+                        <input name="encryptionKey" id="encryption-key-input" value="" type="text"/>
+                    </form>
+                    <small class="modal-encryption-note"></small>
+                </div>
+                <div id="download-error" style="color: red; margin: 1em 0;"></div>
             </div>
         </div>
     </div>
@@ -125,7 +143,9 @@
     <%- include('partials/shareModal') %>
     
     <!-- Include JavaScript files -->
+    <script type="module" src="/js/importKey.js"></script>
     <script src="/js/shareModal.js"></script>
-    <script src="/js/index.js"></script>
+    <script type="module" src="/js/index.js"></script>
+    <script type="module" src="/js/decryptFile.js"></script>
 </body>
 </html>

@@ -1,16 +1,28 @@
 const fs = require('fs');
 require('dotenv').config();
 
+async function keysGet(req, res) {
+    try {
+        const { data: folders, error: folderError } = await req.supabaseClient.from('Folder').select().eq('userid', req.user.id);
+        res.render('keyView', { folders, user: req.user });
+        if (folderError) {
+            console.error("Error fetching folders:", folderError);
+            return res.status(500).send("Error fetching folders");
+        }
+    } catch (error) {
+        console.error("Error fetching folders:", error);
+        return res.status(500).send("Error fetching folders");
+    }
+}
+
+
 async function indexGet(req, res) {
+    // get users own folders
     const { data: folders, error: folderError } = await req.supabaseClient.from('Folder').select().eq('userid', req.user.id);
     const folderid = req.params.folderid || null;
     
     // Get user's own files
     const { data: files, error: fileError } = await getUserFiles(req.supabaseClient, req.user.id, folderid);
-    
-    console.log('userid: ', req.user.id);
-    console.log('folderid: ', folderid);
-    
     // Get shared files
     const { data: sharedFiles, error: sharedFileError } = await getSharedFiles(req.supabaseClient, req.user.id, folderid);
     
@@ -50,9 +62,6 @@ async function indexGet(req, res) {
         parentFolders = [];
     }
 
-    console.log("All accessible folders: ", allAccessibleFolders);
-    console.log("parentFolders: ", parentFolders);
-   
     res.render('indexView', { 
         headerTitle: "MyDrive", 
         rootFolders: rootFolders, 
@@ -82,7 +91,7 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         .from('SharedFiles')
         .select(`
             *,
-            File:file_path (
+            File:file_name (
                 *
             ),
             User:shared_by (
@@ -132,7 +141,6 @@ async function getSharedFiles(supabaseClient, userId, folderid) {
         );
     }
 
-    console.log("FOLDERID: ", folderid)
     return { data: filteredFiles, error: null };
 }
 
@@ -191,8 +199,6 @@ async function getSharedFolders(supabaseClient, userId, folderid) {
             record.Folder.parentid === folderid
         );
     }
-
-    console.log("FILTERED FOLDERS: ", filteredFolders);   
     return { data: { sharedFolderRecords, filteredFolders }, error: null };
 }
 
@@ -214,4 +220,4 @@ function buildParentPath(currentFolderId, allFolders) {
     return path;
 }
 
-module.exports = { indexGet };
+module.exports = { indexGet, keysGet };
