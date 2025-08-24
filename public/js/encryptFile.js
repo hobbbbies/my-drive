@@ -48,10 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = fileInput.files[0];
         if (!file) return;
 
+        const formData = new FormData(form);
         const useEncryption = document.getElementById('use-encryption').checked;
-        if (!useEncryption) {
-            form.submit();
-        } else {
+        if(useEncryption) {
             const userKey = document.getElementById('encryption-key').value;
             const keyInfoDiv = document.getElementById('key-info');
             
@@ -69,29 +68,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem("encryptionKey", key);
                 keyInfoDiv.style.display = 'block';
                 keyInfoDiv.textContent = 'Encryption Key: ' + key;
+                const copyBtn = document.getElementById('copy-key-btn');
+                copyBtn.style.display = 'block';
+
             } else {
                 const cryptoKey = await importKey(userKey);
                 // Use the provided key
                 var { encrypted, iv } = await encryptFile(file, cryptoKey);
             }
-            // Prepare FormData
-            const formData = new FormData(form);
             formData.set('file', encrypted, file.name);
             formData.append('iv', JSON.stringify(iv));
+        }
+        // Submit via fetch
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: formData
+        });
 
-            // Submit via fetch
-            const response = await fetch(form.action, {
-                method: form.method,
-                body: formData
-            });
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
 
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-
-            if (!response.ok) {
-                alert('Upload failed.');
-            }
-    }
+        if (!response.ok) {
+            alert('Upload failed.');
+        }
     });
 });
 
@@ -100,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const keyGroup = document.getElementById('encryption-key-group');
     const encryptionWarning = document.getElementById('encryption-warning');
     const copyBtn = document.getElementById('copy-key-btn');
-    const encryptionKeyInput = document.getElementById('encryption-key');
+    copyBtn.style.display = "none";
 
     useEncryption.addEventListener('change', function() {
         keyGroup.style.display = this.checked ? 'block' : 'none';
@@ -108,10 +107,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const keyInfoDiv = document.getElementById('key-info');
-
-    // Show button only if key-info div has content
-    copyBtn.style.display = keyInfoDiv.textContent.trim() !== "" ? 'block' : 'none';
-
     copyBtn.addEventListener('click', async function() {
         const key = keyInfoDiv.textContent.trim();
         if (key) {
