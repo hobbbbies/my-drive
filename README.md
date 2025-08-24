@@ -10,7 +10,8 @@ It’s a **mock cloud storage platform** — similar in spirit to Google Drive �
 
 ## 🗂️ Features  
 
-- **CRUD Operations** for both files and folders  
+- **CRUD Operations** for both files and folders
+- **Client Side Encrpytion** optional for any file 
 - **Secure Authentication** using Supabase Auth  
 - **Cloud Storage** with Supabase Storage & RLS protection  
 - **Authorization Middleware** to protect user content  
@@ -20,7 +21,7 @@ It’s a **mock cloud storage platform** — similar in spirit to Google Drive �
 ---
 
 ## 🔒 Security  
-
+### RLS 
 MyDrive uses **Supabase Row Level Security (RLS)** to ensure that users can only access their own files and folders.  
 This is achieved by creating database policies that check the authenticated user's `auth.uid()` against the `userid` column in each table.
 
@@ -30,7 +31,21 @@ This is achieved by creating database policies that check the authenticated user
 - Without a valid session or JWT, access is denied at the database level.
 - Even if an endpoint is exposed, RLS prevents unauthorized data access.
 
+### Client-Side Encryption
+MyDrive offers an option to encrypt files **before they are uploaded**. This ensures that even if Supabase storage is compromised, only encrypted data is stored, and the original file remains secure. Encryption is performed in the browser using the **AES-GCM** algorithm, with the encryption key generated and retained solely on the client side.  
 
+Because MyDrive never stores or transmits the key, only the user has the ability to decrypt their files. This means that security depends entirely on the user maintaining control of their keys—if lost, access to the encrypted files cannot be recovered.
+
+**Key points:**
+- Users can choose to enable encryption at the time of upload.  
+- The encryption key is generated and stored only in the browser’s memory/cache.  
+- MyDrive servers and Supabase have **no knowledge of the key** and cannot decrypt files.  
+- To download and access encrypted files, users must provide the correct key.  
+- Keys are short-lived in the browser; users are responsible for securely saving them to avoid permanent data loss.  
+
+Below is a video demonstrating the upload, encryption, navigation, and download features of MyDrive: 
+
+https://github.com/user-attachments/assets/3843de4f-f063-4e8f-8067-3f12cda3c1b0
 
 ---
 
