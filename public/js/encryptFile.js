@@ -65,12 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.textContent = originalText;
                     return;
                 }
-                localStorage.setItem("encryptionKey", key);
+                localStorage.setItem(`encryptionKey-${formData.get('file').name}`, key);
                 keyInfoDiv.style.display = 'block';
                 keyInfoDiv.textContent = 'Encryption Key: ' + key;
-                const copyBtn = document.getElementById('copy-key-btn');
+                const copyBtn = document.getElementById('copy-btn');
                 copyBtn.style.display = 'block';
-
+                copyBtn.addEventListener('click', async function() {
+                    await navigator.clipboard.writeText(key);
+                }); 
             } else {
                 const cryptoKey = await importKey(userKey);
                 // Use the provided key
@@ -98,8 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const useEncryption = document.getElementById('use-encryption');
     const keyGroup = document.getElementById('encryption-key-group');
     const encryptionWarning = document.getElementById('encryption-warning');
-    const copyBtn = document.getElementById('copy-key-btn');
-    copyBtn.style.display = "none";
 
     useEncryption.addEventListener('change', function() {
         keyGroup.style.display = this.checked ? 'block' : 'none';
@@ -107,10 +107,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const keyInfoDiv = document.getElementById('key-info');
-    copyBtn.addEventListener('click', async function() {
-        const key = keyInfoDiv.textContent.trim();
-        if (key) {
-            await navigator.clipboard.writeText(key);
-        }
-    });
 });
