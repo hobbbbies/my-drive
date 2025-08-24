@@ -65,10 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.textContent = originalText;
                     return;
                 }
-                localStorage.setItem(`encryptionKey-${formData.get('file').name}`, key);
-                keyInfoDiv.style.display = 'block';
+                localStorage.setItem(`encryptionKey-${crypto.randomUUID()}`, key);    
                 keyInfoDiv.textContent = 'Encryption Key: ' + key;
-                const copyBtn = document.getElementById('copy-btn');
+                const copyBtn = document.querySelector('.copy-btn');
                 copyBtn.style.display = 'block';
                 copyBtn.addEventListener('click', async function() {
                     await navigator.clipboard.writeText(key);

@@ -27,12 +27,11 @@ function createCopyIcon() {
 
     // Create the <svg> element
     const svg = document.createElementNS(svgNamespace, "svg");
-    svg.classList.add("copy-btn");
     svg.setAttribute("xmlns", svgNamespace);
     svg.setAttribute("width", "24");
     svg.setAttribute("height", "24");
     svg.setAttribute("fill", "currentColor");
-    svg.setAttribute("class", "bi bi-copy");
+    svg.setAttribute("class", "bi bi-copy copy-btn");
     svg.setAttribute("viewBox", "0 0 16 16");
 
     // Create the <path> element
