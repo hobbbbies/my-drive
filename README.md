@@ -85,7 +85,9 @@ cd mydrive
 
 ### 2. Install Dependencies & Configure Environment Variables
 
+```bash
 npm install
+```
 
 Create a `.env` file in the project root:
 
