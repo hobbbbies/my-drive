@@ -1,8 +1,14 @@
 # MyDrive  
 
-**MyDrive** is a personal project built with **Express.js** to deepen my understanding of Node.js, routing, authentication, and cloud storage with **Row Level Security (RLS)**.  
+**MyDrive** is a secure cloud storage platform built with **Express.js** and **Supabase**.  
+It was created as a personal project to deepen my understanding of **Node.js**, routing, authentication, database security, and file storage.  
 
-It’s a **mock cloud storage platform** — similar in spirit to Google Drive — that lets you **create, read, update, and delete (CRUD)** both **files and folders**, while ensuring everything is **securely protected**.  
+Inspired by services like Google Drive, MyDrive allows users to **create, read, update, and delete (CRUD)** both files and folders in a familiar hierarchy. What sets it apart is its strong focus on **security and data ownership**:  
+
+- **Row Level Security (RLS)** ensures that every file and folder can only be accessed by its rightful owner (or those explicitly granted access).  
+- **Optional Client-Side Encryption** adds an extra layer of protection by encrypting files in the browser before they’re uploaded, making sure only the user ever has the key.  
+
+Together, these features guarantee that your data remains **private, encrypted, and fully under your control**.  
 
 🔗 **Live Demo:** [https://my-drive.up.railway.app/](https://my-drive.up.railway.app/) 
 
@@ -79,7 +85,9 @@ cd mydrive
 
 ### 2. Install Dependencies & Configure Environment Variables
 
+```bash
 npm install
+```
 
 Create a `.env` file in the project root:
 
