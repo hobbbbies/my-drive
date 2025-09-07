@@ -9,6 +9,7 @@ router.get("/login", loginController.logout, (req, res) => {
     res.render('loginView');
 });
 router.post("/login", loginController.loginPost);
+router.post("/demo-login", loginController.demoLogin);
 
 router.get("/signup", (req, res) => {
     res.render('signupView');

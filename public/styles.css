@@ -530,6 +530,85 @@ body {
     text-decoration: underline;
 }
 
+.demo-section {
+    margin: 24px 0;
+    text-align: center;
+}
+
+.divider {
+    position: relative;
+    margin: 16px 0;
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--color-border);
+    z-index: 1;
+}
+
+.divider span {
+    background-color: var(--color-background);
+    padding: 0 16px;
+    position: relative;
+    z-index: 2;
+}
+
+.demo-button {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.demo-button:hover {
+    background-color: var(--color-primary-light);
+}
+
+.github-link {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.github-link a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background-color: var(--color-background);
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px var(--color-shadow);
+}
+
+.github-link a:hover {
+    background-color: var(--color-hover);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px var(--color-shadow);
+}
+
 .error-message {
     background-color: var(--color-error-bg);
     color: var(--color-error-text);

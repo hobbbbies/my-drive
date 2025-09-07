@@ -10,8 +10,8 @@ async function generateKey() {
 }
 
 // Encrypt a file (returns { encrypted, iv, key })
-async function encryptFile(file) {
-    const key = await generateKey();
+async function encryptFile(file, providedKey = null) {
+    const key = providedKey || await generateKey();
     const iv = window.crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV for AES-GCM
 
     const fileBuffer = await file.arrayBuffer();
@@ -21,9 +21,12 @@ async function encryptFile(file) {
         fileBuffer
     );
 
-    // Export the key as base64 for storage/sharing
-    const exportedKey = await window.crypto.subtle.exportKey("raw", key);
-    const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
+    let keyBase64 = null;
+    if (!providedKey) {
+        // Export the key as base64 for storage/sharing only if we generated it
+        const exportedKey = await window.crypto.subtle.exportKey("raw", key);
+        keyBase64 = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
+    }
 
     return {
         encrypted: new Blob([encrypted]), // Blob for upload
@@ -73,9 +76,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     await navigator.clipboard.writeText(key);
                 }); 
             } else {
-                const cryptoKey = await importKey(userKey);
-                // Use the provided key
-                var { encrypted, iv } = await encryptFile(file, cryptoKey);
+                try {
+                    const cryptoKey = await importKey(userKey, ["encrypt", "decrypt"]);
+                    // Use the provided key
+                    var { encrypted, iv } = await encryptFile(file, cryptoKey);
+                } catch (error) {
+                    console.error("Failed to use provided key:", error);
+                    alert("Invalid encryption key format. Please provide a valid base64 key.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    return;
+                }
             }
             formData.set('file', encrypted, file.name);
             formData.append('iv', JSON.stringify(iv));
